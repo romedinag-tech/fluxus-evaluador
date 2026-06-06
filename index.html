@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluador Financiero — Fluxus Insight</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Paleta Fluxus: navy dominante, azul acento, naranja acento */
+  --bg:#F7F8FA;--bg2:#ffffff;--bg3:#eef2f7;--bg4:#dbe3ee;
+  --border:rgba(10,29,58,0.12);--border2:rgba(10,29,58,0.20);
+  --text:#0A1D3A;--text2:#4A5568;--text3:#94A3B8;
+  --accent:#2B7FD6;--accent-dim:rgba(43,127,214,0.09);--accent-dim2:rgba(43,127,214,0.16);
+  --warn:#F39200;--warn-dim:rgba(243,146,0,0.10);
+  --blue:#1B5FA8;--blue-dim:rgba(27,95,168,0.09);
+  --gold:#C77F00;--gold-dim:rgba(199,127,0,0.10);
+  --red:#C0222E;--red-dim:rgba(192,34,46,0.08);
+  --green:#1F9D6B;--green-dim:rgba(31,157,107,0.10);
+  --purple:#5c3fa3;--purple-dim:rgba(92,63,163,0.09);
+  --radius:12px;--radius-sm:8px;
+  --font:Calibri,'Segoe UI',system-ui,sans-serif;--mono:'DM Mono',monospace;--font-head:Georgia,'Times New Roman',serif;
+}
+html{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px}
+h1,h2,h3,.sb-logo,.home-hero h2,.cx-grand .cg-v,.obj-intro-text h3,.mc-intro-text h3,.scenario-text h3{font-family:var(--font-head);letter-spacing:0}
+body{min-height:100vh;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(0,127,163,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(0,119,204,0.04) 0%,transparent 60%),var(--bg)}
+.page{max-width:1280px;margin:0 auto;padding:0 24px 80px}
+
+/* HEADER */
+header{padding:48px 0 40px;border-bottom:1px solid var(--border);margin-bottom:32px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';display:inline-block;width:20px;height:1px;background:var(--accent)}
+h1{font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.05;letter-spacing:-0.02em}
+h1 span{color:var(--accent)}
+.header-sub{margin-top:10px;font-size:14px;color:var(--text2);max-width:420px;line-height:1.6}
+.header-badge{display:flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid rgba(43,127,214,0.22);border-radius:100px;padding:8px 16px;font-size:12px;color:var(--accent);font-weight:500;white-space:nowrap}
+.badge-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+/* NAV TABS */
+.nav-tabs{display:flex;gap:4px;margin-bottom:28px;border-bottom:1px solid var(--border)}
+.nav-tab{font-family:var(--font);font-size:12px;font-weight:600;padding:10px 20px;border-radius:8px 8px 0 0;border:1px solid transparent;border-bottom:none;background:transparent;color:var(--text3);cursor:pointer;transition:all 0.15s;letter-spacing:0.05em;position:relative;top:1px}
+.nav-tab:hover{color:var(--text2);background:var(--bg2)}
+.nav-tab.active{background:var(--bg2);color:var(--accent);border-color:var(--border);border-bottom-color:var(--bg2)}
+.tab-section{display:none}
+.tab-section.active{display:block}
+
+/* LAYOUT */
+.main-grid{display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr}}
+.right-col{display:flex;flex-direction:column;gap:20px}
+
+/* PANELS */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.panel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.panel-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.panel-title{font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2)}
+
+/* SLIDERS */
+.sliders-wrap{padding:6px 0 12px}
+.section-sep{padding:14px 20px 6px;font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3)}
+.slider-item{padding:10px 20px 14px;border-bottom:1px solid var(--border);transition:background 0.15s}
+.slider-item:last-child{border-bottom:none}
+.slider-item:hover{background:rgba(255,255,255,0.015)}
+.slider-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.slider-name{font-size:13px;color:var(--text2);font-weight:500}
+.slider-val{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text);min-width:110px;text-align:right}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.18);transition:transform 0.1s,box-shadow 0.1s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 2px 8px rgba(0,127,163,0.25)}
+.slider-limits{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+@media(max-width:700px){.metrics-grid{grid-template-columns:repeat(2,1fr)}}
+.metric-card{background:var(--bg2);padding:20px 18px;position:relative;overflow:hidden;transition:background 0.2s}
+.metric-card:hover{background:var(--bg3)}
+.metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--card-color,transparent);opacity:0.6}
+.metric-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.metric-value{font-family:var(--mono);font-size:22px;font-weight:500;line-height:1;color:var(--text);margin-bottom:6px;transition:color 0.3s}
+.metric-sub{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.metric-card.is-pos{--card-color:var(--accent)}.metric-card.is-pos .metric-value{color:var(--accent)}
+.metric-card.is-neg{--card-color:var(--red)}.metric-card.is-neg .metric-value{color:var(--red)}
+.metric-card.is-warn{--card-color:var(--warn)}.metric-card.is-warn .metric-value{color:var(--warn)}
+.metric-card.is-blue{--card-color:var(--blue)}.metric-card.is-blue .metric-value{color:var(--blue)}
+
+/* CHART */
+.chart-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius)}
+.chart-panel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.chart-panel-title{font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2)}
+.tab-group{display:flex;gap:4px}
+.tab-btn{font-family:var(--font);font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all 0.15s;letter-spacing:0.05em}
+.tab-btn:hover{color:var(--text2);background:var(--bg3)}
+.tab-btn.active{background:var(--accent-dim2);color:var(--accent);border-color:rgba(43,127,214,0.25)}
+.chart-legend{padding:12px 20px 0;display:flex;gap:20px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.leg-dot{width:20px;height:2px;border-radius:1px}
+.leg-dot.dashed{background:repeating-linear-gradient(to right,var(--gold) 0,var(--gold) 4px,transparent 4px,transparent 8px)}
+.chart-area{padding:16px 20px 20px}
+.chart-canvas-wrap{position:relative;height:280px}
+
+/* BOTTOM */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.bottom-grid{grid-template-columns:1fr}}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:10px 14px;text-align:right;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap}
+thead th:first-child{text-align:left}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,0.02)}
+tbody td{padding:9px 14px;text-align:right;font-family:var(--mono);font-size:12px;color:var(--text2);white-space:nowrap}
+tbody td:first-child{text-align:left;color:var(--text3)}
+.td-pos{color:var(--accent)!important}.td-neg{color:var(--red)!important}
+.payback-row{background:var(--accent-dim)!important}.payback-row td{color:var(--accent)!important}
+
+/* SCENARIO */
+.scenario-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.scenario-title{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.scenario-result{padding:14px 16px;border-radius:var(--radius-sm);margin-bottom:10px;display:flex;align-items:flex-start;gap:12px}
+.scenario-result.viable{background:var(--accent-dim);border:1px solid rgba(31,157,107,0.18)}
+.scenario-result.marginal{background:var(--gold-dim);border:1px solid rgba(243,146,0,0.16)}
+.scenario-result.inviable{background:var(--red-dim);border:1px solid rgba(192,34,46,0.16)}
+.scenario-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.scenario-text h3{font-size:14px;font-weight:700;margin-bottom:4px}
+.scenario-result.viable .scenario-text h3{color:var(--accent)}
+.scenario-result.marginal .scenario-text h3{color:var(--gold)}
+.scenario-result.inviable .scenario-text h3{color:var(--red)}
+.scenario-text p{font-size:12px;color:var(--text2);line-height:1.5}
+.kpi-row{display:flex;flex-direction:column;gap:8px}
+.kpi-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg3);border-radius:var(--radius-sm)}
+.kpi-name{font-size:12px;color:var(--text2)}
+.kpi-val{font-family:var(--mono);font-size:13px;font-weight:500}
+
+/* ══ MONTECARLO ══ */
+.mc-grid{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
+@media(max-width:900px){.mc-grid{grid-template-columns:1fr}}
+.mc-intro{background:var(--purple-dim);border:1px solid rgba(192,132,252,0.15);border-radius:var(--radius);padding:20px;margin-bottom:24px;display:flex;gap:14px;align-items:flex-start}
+.mc-intro-icon{font-size:24px;flex-shrink:0}
+.mc-intro-text h3{font-size:14px;font-weight:700;color:var(--purple);margin-bottom:6px}
+.mc-intro-text p{font-size:12px;color:var(--text2);line-height:1.6}
+.mc-var-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.mc-var-item{padding:14px 20px;border-bottom:1px solid var(--border)}
+.mc-var-item:last-child{border-bottom:none}
+.mc-var-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.mc-var-name{font-size:13px;color:var(--text2);font-weight:500}
+.mc-var-type{font-size:9px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--purple-dim);color:var(--purple);letter-spacing:0.08em;text-transform:uppercase}
+.mc-range-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:6px}
+.mc-range-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;text-align:center}
+.mc-range-input:focus{border-color:var(--purple)}
+.mc-range-sep{font-size:11px;color:var(--text3);text-align:center}
+.mc-range-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono)}
+.mc-run-btn{width:100%;padding:14px;margin-top:16px;background:linear-gradient(135deg,rgba(192,132,252,0.2),rgba(110,198,255,0.15));border:1px solid rgba(192,132,252,0.3);border-radius:var(--radius-sm);color:var(--purple);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.05em;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.mc-run-btn:hover{background:linear-gradient(135deg,rgba(192,132,252,0.3),rgba(110,198,255,0.25));border-color:var(--purple)}
+.mc-run-btn:disabled{opacity:0.6;cursor:not-allowed}
+.mc-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(192,132,252,0.3);border-top-color:var(--purple);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mc-fixed{margin-top:12px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.mc-fixed-title{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.mc-results{display:flex;flex-direction:column;gap:20px}
+.mc-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+@media(max-width:600px){.mc-metrics{grid-template-columns:1fr 1fr}}
+.mc-metric{background:var(--bg2);padding:18px 16px}
+.mc-metric-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.mc-metric-value{font-family:var(--mono);font-size:20px;font-weight:500;margin-bottom:4px}
+.mc-metric-sub{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.mc-prob-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.mc-prob-title{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
+.mc-prob-main{display:flex;align-items:center;gap:20px;margin-bottom:20px}
+.mc-prob-circle{width:90px;height:90px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:18px;font-weight:500;position:relative}
+.mc-prob-circle::before{content:'';position:absolute;width:68px;height:68px;border-radius:50%;background:var(--bg2)}
+.mc-prob-circle span{position:relative;z-index:1}
+.mc-prob-desc{font-size:13px;color:var(--text2);line-height:1.6;flex:1}
+.mc-bar-row{margin-bottom:10px}
+.mc-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;font-family:var(--mono)}
+.mc-bar-track{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.mc-bar-fill{height:100%;border-radius:3px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1)}
+.mc-dist-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.mc-dist-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.mc-dist-title{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.mc-dist-sub{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.mc-dist-canvas{position:relative;height:200px;margin-top:12px}
+.mc-percentiles{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:16px}
+@media(max-width:600px){.mc-percentiles{grid-template-columns:repeat(3,1fr)}}
+.mc-pct{background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center;border:1px solid var(--border)}
+.mc-pct-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px}
+.mc-pct-val{font-family:var(--mono);font-size:13px;font-weight:500}
+.mc-empty{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:60px 20px;text-align:center;color:var(--text3)}
+.mc-empty-icon{font-size:40px;margin-bottom:16px;opacity:0.4}
+
+footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--text3)}
+.metric-value,.slider-val,td{transition:all 0.2s ease}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+
+/* ══ OBJETIVO v2 ══ */
+.obj-intro{background:rgba(243,146,0,0.07);border:1px solid rgba(243,146,0,0.20);border-radius:var(--radius);padding:20px;margin-bottom:24px;display:flex;gap:14px;align-items:flex-start}
+.obj-intro-icon{font-size:24px;flex-shrink:0}
+.obj-intro-text h3{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:6px}
+.obj-intro-text p{font-size:12px;color:var(--text2);line-height:1.6}
+.obj-layout{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+@media(max-width:960px){.obj-layout{grid-template-columns:1fr}}
+.obj-ctrl{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.obj-section{padding:16px 18px;border-bottom:1px solid var(--border)}
+.obj-section:last-child{border-bottom:none}
+.obj-label{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.obj-van-display{font-family:var(--mono);font-size:38px;font-weight:500;color:var(--gold);text-align:center;margin:4px 0 6px}
+.obj-van-sub{font-size:11px;color:var(--text3);font-family:var(--mono);text-align:center;margin-bottom:12px}
+.obj-mode-row{display:flex;gap:6px;margin-bottom:14px}
+.obj-mode-btn{flex:1;padding:8px 6px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--text3);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;line-height:1.3}
+.obj-mode-btn:hover{color:var(--text2);background:var(--bg3)}
+.obj-mode-btn.active{background:var(--gold-dim);color:var(--gold);border-color:rgba(243,146,0,0.32)}
+.obj-input-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:6px}
+.obj-computed{background:var(--bg3);border-radius:7px;padding:12px 14px;border:1px solid var(--border);margin-top:10px}
+.obj-computed-label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.obj-computed-val{font-family:var(--mono);font-size:22px;font-weight:500}
+.obj-computed-sub{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px}
+.obj-result-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.obj-rc{background:var(--bg3);border-radius:7px;padding:10px 12px;border:1px solid var(--border)}
+.obj-rc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;font-weight:600}
+.obj-rc-val{font-family:var(--mono);font-size:16px;font-weight:500}
+.obj-rc-sub{font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.obj-status{padding:12px 14px;border-radius:7px;display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:12px;line-height:1.5}
+.obj-status.ok{background:var(--accent-dim);border:1px solid rgba(31,157,107,0.18);color:var(--text2)}
+.obj-status.warn{background:var(--gold-dim);border:1px solid rgba(243,146,0,0.20);color:var(--text2)}
+.obj-status.no{background:var(--red-dim);border:1px solid rgba(192,34,46,0.16);color:var(--text2)}
+.obj-status-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.obj-chart-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.obj-chart-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;flex-wrap:wrap;gap:8px}
+.obj-chart-title{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2)}
+.obj-chart-legend{display:flex;gap:14px;font-size:11px;color:var(--text2);flex-wrap:wrap}
+.obj-leg-item{display:flex;align-items:center;gap:5px}
+.obj-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.obj-leg-line{width:18px;height:2px;border-radius:1px;flex-shrink:0}
+.obj-chart-sub{font-size:11px;color:var(--text3);margin-bottom:14px;font-family:var(--mono)}
+.obj-canvas-wrap{position:relative;height:360px}
+.obj-info-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+@media(max-width:600px){.obj-info-strip{grid-template-columns:1fr 1fr}}
+.obj-strip-card{background:var(--bg3);border-radius:7px;padding:10px 12px;border:1px solid var(--border);text-align:center}
+.obj-strip-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;font-weight:600}
+.obj-strip-val{font-family:var(--mono);font-size:14px;font-weight:500}
+
+
+/* ===== SIDEBAR LAYOUT ===== */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:230px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-brand{padding:0 22px 22px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.sidebar-brand .sb-logo{font-size:19px;font-weight:800;letter-spacing:-0.02em;color:var(--text)}
+.sidebar-brand .sb-logo span{color:var(--accent)}
+.sidebar-brand .sb-tag{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+.sb-nav{display:flex;flex-direction:column;gap:2px;padding:0 12px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:9px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text2);background:transparent;border:none;cursor:pointer;text-align:left;transition:all .14s;width:100%;letter-spacing:.01em}
+.sb-link:hover{background:var(--accent-dim);color:var(--text)}
+.sb-link.active{background:var(--accent);color:#fff}
+.sb-link .sb-ic{font-size:15px;width:18px;text-align:center}
+.sb-foot{margin-top:auto;padding:22px;font-size:10px;color:var(--text3);font-family:var(--mono)}
+.main-area{flex:1;min-width:0;padding:0 32px 80px;max-width:1320px}
+.main-area>header{padding:36px 0 28px}
+@media(max-width:900px){.app-shell{flex-direction:column}.sidebar{width:100%;height:auto;position:relative;display:flex;flex-direction:column}.sb-nav{flex-direction:row;flex-wrap:wrap}.main-area{padding:0 18px 60px}}
+
+/* ===== MOBILE ===== */
+@media(max-width:600px){
+  html{font-size:14px}
+  .page{padding:0 12px 60px}
+  header{padding:20px 0 16px;gap:12px}
+  h1{font-size:24px}
+  .header-sub{font-size:12px}
+  .header-badge{font-size:11px;padding:6px 11px}
+  .nav-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;padding-bottom:0}
+  .nav-tabs::-webkit-scrollbar{display:none}
+  .nav-tab{font-size:11px;padding:9px 13px;white-space:nowrap;flex-shrink:0}
+  .main-grid,.mc-grid,.obj-layout,.bottom-grid{grid-template-columns:1fr!important;gap:14px}
+  .metrics-grid{grid-template-columns:1fr 1fr!important}
+  .metric-card{padding:13px 11px}
+  .metric-value{font-size:17px}
+  .metric-label{font-size:9px}
+  .slider-item{padding:10px 13px 12px}
+  .slider-val{font-size:13px;min-width:80px}
+  .slider-name{font-size:12px}
+  input[type=range]::-webkit-slider-thumb{width:22px;height:22px}
+  input[type=range]{height:4px}
+  .chart-canvas-wrap{height:210px}
+  .obj-canvas-wrap{height:240px}
+  .mc-dist-canvas{height:150px}
+  .mc-metrics{grid-template-columns:1fr 1fr!important}
+  .mc-metric{padding:13px 11px}
+  .mc-metric-value{font-size:16px}
+  .mc-percentiles{grid-template-columns:repeat(3,1fr)!important}
+  .mc-run-btn{padding:13px;font-size:13px}
+  .mc-intro,.obj-intro{padding:13px;gap:10px}
+  .obj-info-strip,.obj-result-cards{grid-template-columns:1fr 1fr!important}
+  .obj-van-display{font-size:28px}
+  .obj-computed-val{font-size:18px}
+  .obj-mode-btn{font-size:11px;padding:9px 5px}
+  .tab-group{flex-wrap:wrap;gap:3px}
+  .tab-btn{font-size:10px;padding:5px 9px}
+  .chart-panel-header{gap:8px}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:460px}
+  .sidebar{padding:12px 0}
+  .sidebar-brand{padding:0 13px 10px;margin-bottom:6px}
+  .sidebar-brand .sb-logo{font-size:15px}
+  .sb-nav{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:3px;padding:0 8px;scrollbar-width:none}
+  .sb-nav::-webkit-scrollbar{display:none}
+  .sb-link{padding:7px 11px;font-size:12px;white-space:nowrap}
+  .sb-foot{display:none}
+  .main-area{padding:0 12px 60px}
+  .main-area>header{padding:16px 0 13px}
+  footer{flex-direction:column;gap:5px;text-align:center;margin-top:36px}
+  .panel-header{padding:11px 13px}
+  .scenario-panel{padding:14px}
+
+  /* CAPEX / OPEX tables → card layout */
+  .cx-table thead{display:none}
+  .cx-table tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center}
+  .cx-table tbody tr.cx-tot-row{grid-template-columns:1fr auto;background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:4px}
+  .cx-table td{padding:0;border:none;text-align:left!important;font-size:12px}
+  .cx-table td:first-child{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:2px}
+  .cx-table td.cx-calc{color:var(--accent);font-weight:600;font-size:13px}
+  .cx-in{width:100%!important;font-size:13px!important}
+  /* label for inputs */
+  .cx-table td:nth-child(2)::before{content:'P/U: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
+  .cx-table td:nth-child(3)::before{content:'Cant.: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
+  .cx-table td:nth-child(4)::before{content:'Total: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
+  .cx-table tbody tr.cx-tot-row td:first-child::before{display:none}
+  .cx-table tbody tr.cx-tot-row td:nth-child(2)::before,.cx-table tbody tr.cx-tot-row td:nth-child(3)::before,.cx-table tbody tr.cx-tot-row td:nth-child(4)::before{display:none}
+  /* cx-panel padding */
+  .cx-panel{padding:16px 14px}
+  .cx-grand{padding:16px 18px}
+  .cx-grand .cg-v{font-size:22px}
+  .cx-grid2{gap:12px}
+  .prov-btn{min-width:100%}
+}
+
+/* ===== HOME ===== */
+.home-hero{background:linear-gradient(135deg,var(--accent) 0%,#005f7a 100%);border-radius:18px;padding:44px 40px;color:#fff;margin-bottom:28px}
+.home-hero h2{font-size:clamp(22px,3vw,32px);font-weight:800;line-height:1.15;margin-bottom:12px;color:#fff}
+.home-hero p{font-size:14px;line-height:1.6;color:rgba(255,255,255,.85);max-width:680px}
+.flota-ask{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:32px 36px;margin-bottom:28px;text-align:center}
+.flota-ask .fa-q{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:18px}
+.flota-input-wrap{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+#home-flota{font-family:var(--font);font-size:64px;font-weight:800;width:200px;text-align:center;border:none;border-bottom:3px solid var(--accent);background:transparent;color:var(--accent);outline:none;padding:4px 0}
+#home-flota::-webkit-inner-spin-button{opacity:1}
+.flota-input-wrap .fa-unit{font-size:20px;font-weight:700;color:var(--text2)}
+.fa-hint{font-size:12px;color:var(--text3);margin-top:14px;font-family:var(--mono)}
+.home-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:26px}
+.home-card{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:20px;cursor:pointer;transition:all .15s}
+.home-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.home-card .hc-ic{font-size:22px;margin-bottom:10px}
+.home-card .hc-t{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px}
+.home-card .hc-d{font-size:11.5px;color:var(--text3);line-height:1.5}
+.home-card .hc-v{font-size:20px;font-weight:800;color:var(--accent);margin-top:10px;font-family:var(--mono)}
+
+/* ===== CAPEX / OPEX FORMS ===== */
+.cx-subnav{display:flex;gap:6px;margin-bottom:22px}
+.cx-subtab{font-family:var(--font);font-size:12px;font-weight:600;padding:9px 18px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .14s}
+.cx-subtab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cx-panel{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:26px;margin-bottom:20px}
+.cx-panel h3{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:6px}
+.cx-panel .cx-sub{font-size:12px;color:var(--text3);margin-bottom:20px;line-height:1.5}
+.cx-table{width:100%;border-collapse:collapse}
+.cx-table th{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);text-align:right;padding:8px 10px;border-bottom:1px solid var(--border)}
+.cx-table th:first-child{text-align:left}
+.cx-table td{padding:7px 10px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);text-align:right}
+.cx-table td:first-child{text-align:left;font-weight:500}
+.cx-table tr:last-child td{border-bottom:none}
+.cx-in{font-family:var(--mono);font-size:13px;width:115px;text-align:right;padding:7px 9px;border:1px solid var(--border2);border-radius:7px;background:var(--bg);color:var(--text);outline:none}
+.cx-in:focus{border-color:var(--accent)}
+.cx-in.locked{background:var(--bg3);color:var(--text2);cursor:not-allowed}
+.cx-calc{font-family:var(--mono);font-weight:600;color:var(--text2)}
+.cx-tot-row td{font-weight:800;font-size:14px;color:var(--text)!important;border-top:2px solid var(--border2)!important;padding-top:12px!important}
+.cx-grand{background:linear-gradient(135deg,var(--accent) 0%,#005f7a 100%);border-radius:13px;padding:22px 26px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-top:8px}
+.cx-grand .cg-l{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.cx-grand .cg-v{font-size:30px;font-weight:800;font-family:var(--mono)}
+.cx-grand .cg-x{font-size:12px;opacity:.8;font-family:var(--mono)}
+.cx-note{font-size:11px;color:var(--text3);font-style:italic;margin-top:8px;line-height:1.5}
+.cx-grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:780px){.cx-grid2{grid-template-columns:1fr}}
+.cx-kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.cx-kv:last-child{border-bottom:none}
+.cx-kv .kv-k{color:var(--text2)}
+.cx-kv .kv-v{font-family:var(--mono);font-weight:600;color:var(--text)}
+.prov-pick{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.prov-btn{flex:1;min-width:160px;padding:16px;border:2px solid var(--border);border-radius:12px;background:var(--bg);cursor:pointer;transition:all .15s;text-align:left}
+.prov-btn.active{border-color:var(--accent);background:var(--accent-dim)}
+.prov-btn .pb-n{font-size:14px;font-weight:700;color:var(--text)}
+.prov-btn .pb-d{font-size:11px;color:var(--text3);margin-top:3px}
+.prov-btn .pb-v{font-size:18px;font-weight:800;color:var(--accent);margin-top:8px;font-family:var(--mono)}
+.cx-slider-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)}
+.cx-slider-row label{flex:1;font-size:13px;color:var(--text2)}
+.cx-slider-row input[type=range]{flex:1.4}
+.cx-slider-row .csr-v{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);width:90px;text-align:right}
+
+
+.obj-solve-field{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;transition:all .15s}
+.obj-solve-field label{flex:1;font-size:12px;font-weight:600;color:var(--text2)}
+.obj-solve-field input{width:100px;font-family:var(--mono);font-size:14px;font-weight:600;text-align:right;padding:6px 9px;border:1px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text);outline:none}
+.obj-solve-field input:focus{border-color:var(--gold)}
+.obj-solve-field input:disabled{background:var(--gold-dim);color:var(--gold);border-color:rgba(243,146,0,0.38);font-weight:800;cursor:not-allowed}
+.obj-solve-field.solving{border-color:rgba(243,146,0,0.45);background:var(--gold-dim)}
+.obj-solve-tag{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);min-width:54px;text-align:right}
+
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sb-logo">Flux<span>us</span></div>
+    <div class="sb-tag">Evaluación financiera</div>
+  </div>
+  <nav class="sb-nav">
+    <button class="sb-link active" data-sec="home" onclick="navTo('home')"><span class="sb-ic">🏠</span> Home</button>
+    <button class="sb-link" data-sec="capex" onclick="navTo('capex')"><span class="sb-ic">🏗️</span> CAPEX</button>
+    <button class="sb-link" data-sec="opex" onclick="navTo('opex')"><span class="sb-ic">🔄</span> OPEX</button>
+    <button class="sb-link" data-sec="sumario" onclick="navTo('sumario')"><span class="sb-ic">📋</span> Sumario</button>
+    <button class="sb-link" data-sec="evaluador" onclick="navTo('evaluador')"><span class="sb-ic">📊</span> Evaluador</button>
+    <button class="sb-link" data-sec="montecarlo" onclick="navTo('montecarlo')"><span class="sb-ic">🎲</span> Montecarlo</button>
+    <button class="sb-link" data-sec="objetivo" onclick="navTo('objetivo')"><span class="sb-ic">🎯</span> Escenario Objetivo</button>
+  </nav>
+  <div class="sb-foot">Fluxus · V&amp;R Ingeniería<br>Modelo financiero v2</div>
+</aside>
+
+<main class="main-area">
+
+
+<header>
+  <div class="header-left">
+    <div class="eyebrow">Fluxus · Evaluación financiera</div>
+    <h1 id="page-title">Evaluador de Rentabilidad</h1>
+    <p class="header-sub" id="page-sub">Configura CAPEX y OPEX, evalúa la viabilidad y cuantifica el riesgo del proyecto.</p>
+  </div>
+  <div class="header-badge"><span class="badge-dot"></span><span id="hdr-flota">— buses</span></div>
+</header>
+
+<!-- ══ HOME ══════════════════════════════════════════════ -->
+<div id="sec-home" class="tab-section active">
+  <div class="home-hero">
+    <h2>Evaluador financiero del proyecto Fluxus</h2>
+    <p>Esta herramienta estima con fundamento el CAPEX (inversión inicial) y el OPEX (costo operacional mensual) de desplegar el sistema de conteo de pasajeros en una flota de buses, y evalúa su rentabilidad. A partir del desglose de costos reales, calcula VAN, TIR y payback, y cuantifica el riesgo mediante simulación de Montecarlo. Empieza definiendo el tamaño de flota a evaluar.</p>
+  </div>
+
+  <div class="flota-ask">
+    <div class="fa-q">¿Para cuántos buses es esta evaluación?</div>
+    <div class="flota-input-wrap">
+      <input type="number" id="home-flota" min="1" max="5000" value="100">
+      <span class="fa-unit">buses</span>
+    </div>
+    <div class="fa-hint">Este número alimenta CAPEX, OPEX, Evaluador, Montecarlo y Escenario Objetivo de forma consistente.</div>
+  </div>
+
+  <div class="home-cards">
+    <div class="home-card" onclick="navTo('capex')">
+      <div class="hc-ic">🏗️</div>
+      <div class="hc-t">CAPEX</div>
+      <div class="hc-d">Inversión inicial: kits, instalación, herramientas, campaña de despliegue.</div>
+      <div class="hc-v" id="home-capex-v">—</div>
+    </div>
+    <div class="home-card" onclick="navTo('opex')">
+      <div class="hc-ic">🔄</div>
+      <div class="hc-t">OPEX</div>
+      <div class="hc-d">Costo operacional mensual: sueldos, arriendos, leasing, equipo de terreno.</div>
+      <div class="hc-v" id="home-opex-v">—</div>
+    </div>
+    <div class="home-card" onclick="navTo('evaluador')">
+      <div class="hc-ic">📊</div>
+      <div class="hc-t">Evaluador</div>
+      <div class="hc-d">VAN, TIR, payback y flujo de caja del proyecto.</div>
+      <div class="hc-v" id="home-van-v">—</div>
+    </div>
+    <div class="home-card" onclick="navTo('montecarlo')">
+      <div class="hc-ic">🎲</div>
+      <div class="hc-t">Montecarlo</div>
+      <div class="hc-d">Probabilidad de éxito simulando 10.000 escenarios.</div>
+      <div class="hc-v" id="home-mc-v">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CAPEX ═════════════════════════════════════════════ -->
+<div id="sec-capex" class="tab-section">
+  <div class="cx-subnav">
+    <button class="cx-subtab active" id="cxst-form" onclick="cxSub('form')">Desglose CAPEX</button>
+    <button class="cx-subtab" id="cxst-cot" onclick="cxSub('cot')">Análisis de cotizaciones</button>
+  </div>
+
+  <!-- Sub: desglose -->
+  <div id="cx-form">
+    <div class="cx-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:18px">
+        <div>
+          <h3 style="margin-bottom:4px">Componentes por bus (escalan con la flota)</h3>
+          <p class="cx-sub" style="margin:0">Valores netos, sin IVA (el IVA se recupera como crédito fiscal).</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg3);padding:8px 14px;border-radius:9px;border:1px solid var(--border)">
+          <span style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Flota a evaluar</span>
+          <input class="cx-in" id="cx-flota-local" value="100" style="width:80px;font-size:15px;font-weight:700;color:var(--accent)">
+          <span style="font-size:12px;color:var(--text3)">buses</span>
+        </div>
+      </div>
+      <table class="cx-table">
+        <thead><tr><th>Componente</th><th>P/U neto (CLP)</th><th>Cantidad</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Costo Kit (cámara + host, internado)</td>
+            <td><input class="cx-in locked" id="cx-kit-pu" value="0" readonly></td>
+            <td class="cx-calc" id="cx-kit-q">100</td>
+            <td class="cx-calc" id="cx-kit-t">$0</td>
+          </tr>
+          <tr>
+            <td>Cables y artefactos de instalación / bus</td>
+            <td><input class="cx-in" id="cx-cab-pu" value="25000"></td>
+            <td class="cx-calc" id="cx-cab-q">100</td>
+            <td class="cx-calc" id="cx-cab-t">$0</td>
+          </tr>
+          <tr>
+            <td>Instalación por bus (instalador a trato)</td>
+            <td><input class="cx-in" id="cx-ins-pu" value="30000"></td>
+            <td class="cx-calc" id="cx-ins-q">100</td>
+            <td class="cx-calc" id="cx-ins-t">$0</td>
+          </tr>
+          <tr>
+            <td>Enclosure (= cantidad de hosts)</td>
+            <td><input class="cx-in" id="cx-enc-pu" value="20000"></td>
+            <td class="cx-calc" id="cx-enc-q">100</td>
+            <td class="cx-calc" id="cx-enc-t">$0</td>
+          </tr>
+          <tr class="cx-tot-row"><td>Subtotal por-bus</td><td></td><td></td><td class="cx-calc" id="cx-sub-bus">$0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cx-panel">
+      <h3>Campaña de instalación (one-time)</h3>
+      <p class="cx-sub">Los días de campaña se calculan: flota ÷ (instaladores × productividad). Cuadrillas de 4 (1 supervisor + 3 instaladores) por camioneta. Valores netos sin IVA.</p>
+      <table class="cx-table">
+        <thead><tr><th>Parámetro de campaña</th><th>P/U neto (CLP)</th><th>Cantidad</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Nº de instaladores</td>
+            <td style="color:var(--text3);font-size:11px">define duración ↓</td>
+            <td><input class="cx-in" id="cx-ninst" value="3"></td>
+            <td class="cx-calc">—</td>
+          </tr>
+          <tr>
+            <td>Productividad (buses / instalador / día)</td>
+            <td style="color:var(--text3);font-size:11px">calcula días ↓</td>
+            <td><input class="cx-in" id="cx-prod" value="3"></td>
+            <td class="cx-calc">—</td>
+          </tr>
+          <tr>
+            <td>Instaladores por camioneta</td>
+            <td style="color:var(--text3);font-size:11px">cuadrilla de 4 (1 sup + 3) </td>
+            <td><input class="cx-in" id="cx-inst-cam" value="3"></td>
+            <td class="cx-calc">—</td>
+          </tr>
+          <tr>
+            <td>Instaladores por supervisor</td>
+            <td style="color:var(--text3);font-size:11px">1 sup hasta N inst</td>
+            <td><input class="cx-in" id="cx-inst-sup" value="3"></td>
+            <td class="cx-calc">—</td>
+          </tr>
+          <tr style="background:var(--accent-dim)">
+            <td><strong>Días de campaña (calculado)</strong></td>
+            <td style="color:var(--text3);font-size:11px">flota ÷ inst ÷ prod</td>
+            <td class="cx-calc" id="cx-dias" style="color:var(--accent);font-weight:700">—</td>
+            <td class="cx-calc">—</td>
+          </tr>
+          <tr>
+            <td>Pago instaladores a trato (× buses)</td>
+            <td style="color:var(--text3);font-size:11px">ya en "por-bus" ↑</td>
+            <td class="cx-calc" id="cx-trato-q">—</td>
+            <td class="cx-calc" id="cx-trato-t">$0</td>
+          </tr>
+          <tr>
+            <td>Herramientas instaladores</td>
+            <td><input class="cx-in" id="cx-her-pu" value="300000"></td>
+            <td class="cx-calc" id="cx-her-q">3</td>
+            <td class="cx-calc" id="cx-her-t">$0</td>
+          </tr>
+          <tr>
+            <td>Notebook para calibradores</td>
+            <td><input class="cx-in" id="cx-nb-pu" value="800000"></td>
+            <td class="cx-calc" id="cx-nb-q">3</td>
+            <td class="cx-calc" id="cx-nb-t">$0</td>
+          </tr>
+          <tr>
+            <td>Equipo analista (computador, × nº analistas)</td>
+            <td><input class="cx-in" id="cx-pca-pu" value="900000"></td>
+            <td class="cx-calc" id="cx-pca-q">1</td>
+            <td class="cx-calc" id="cx-pca-t">$0</td>
+          </tr>
+          <tr>
+            <td>Honorario supervisor / día (× días × Nº sup)</td>
+            <td><input class="cx-in" id="cx-sup-pu" value="60000"></td>
+            <td class="cx-calc" id="cx-sup-q">—</td>
+            <td class="cx-calc" id="cx-sup-t">$0</td>
+          </tr>
+          <tr>
+            <td>Arriendo camioneta / día (× días × Nº camionetas)</td>
+            <td><input class="cx-in" id="cx-veh-pu" value="45000"></td>
+            <td class="cx-calc" id="cx-veh-q">—</td>
+            <td class="cx-calc" id="cx-veh-t">$0</td>
+          </tr>
+          <tr>
+            <td>Traslado de equipos (global)</td>
+            <td><input class="cx-in" id="cx-tras-pu" value="500000"></td>
+            <td class="cx-calc">1</td>
+            <td class="cx-calc" id="cx-tras-t">$0</td>
+          </tr>
+          <tr class="cx-tot-row"><td>Subtotal campaña</td><td></td><td></td><td class="cx-calc" id="cx-sub-camp">$0</td></tr>
+        </tbody>
+      </table>
+      <p class="cx-note" id="cx-camp-note">—</p>
+    </div>
+
+    <div class="cx-grand">
+      <div><div class="cg-l">CAPEX total del proyecto</div><div class="cg-x" id="cx-grand-x">— buses</div></div>
+      <div class="cg-v" id="cx-grand-v">$0</div>
+    </div>
+    <p class="cx-note">El "Costo Kit" se toma de la pestaña <strong>Análisis de cotizaciones</strong>. Cambia ahí el proveedor y los parámetros de importación para ver cómo varía.</p>
+  </div>
+
+  <!-- Sub: cotizaciones (réplica lógica del Excel) -->
+  <div id="cx-cot" style="display:none">
+    <div class="cx-panel">
+      <h3>Análisis de cotizaciones — costo del kit puesto en Chile</h3>
+      <p class="cx-sub">Misma lógica del modelo CAPEX en Excel. Elige proveedor y ajusta los parámetros de importación; el costo del kit alimenta el CAPEX automáticamente.</p>
+
+      <div class="prov-pick">
+        <div class="prov-btn active" id="pb-foorir" onclick="setProv('foorir')">
+          <div class="pb-n">Foorir</div>
+          <div class="pb-d">Cámara binocular/estéreo 3D + host. 2 cám + 1 host/bus.</div>
+          <div class="pb-v" id="pb-foorir-v">$0</div>
+        </div>
+        <div class="prov-btn" id="pb-alway" onclick="setProv('alway')">
+          <div class="pb-n">AlwayCare PC26</div>
+          <div class="pb-d">Kit cerrado: MDVR + 2 cám APC (monocular) + DMS.</div>
+          <div class="pb-v" id="pb-alway-v">$0</div>
+        </div>
+      </div>
+
+      <div class="cx-grid2">
+        <div>
+          <h3 style="margin-bottom:14px">Parámetros de importación</h3>
+          <div class="cx-slider-row"><label>Tipo de cambio (CLP/USD)</label><input type="range" id="ck-tc" min="800" max="1050" step="5" value="900"><span class="csr-v" id="ck-tc-v">900</span></div>
+          <div class="cx-slider-row"><label>IVA</label><input type="range" id="ck-iva" min="0" max="25" step="1" value="19"><span class="csr-v" id="ck-iva-v">19%</span></div>
+          <div class="cx-slider-row"><label>¿Recupera IVA? (crédito fiscal)</label><input type="range" id="ck-recup" min="0" max="1" step="1" value="1"><span class="csr-v" id="ck-recup-v">Sí</span></div>
+          <div class="cx-slider-row"><label>Cámaras por bus</label><input type="range" id="ck-cam" min="1" max="4" step="1" value="2"><span class="csr-v" id="ck-cam-v">2</span></div>
+          <div class="cx-slider-row"><label>Descuento por volumen s/ FOB</label><input type="range" id="ck-desc" min="0" max="45" step="1" value="18"><span class="csr-v" id="ck-desc-v">18%</span></div>
+          <div class="cx-slider-row"><label>Buses por embarque (modo consolidado)</label><input type="range" id="ck-emb" min="10" max="300" step="10" value="50"><span class="csr-v" id="ck-emb-v">50</span></div>
+          <div class="cx-slider-row"><label>Modo internación</label><input type="range" id="ck-mode" min="0" max="1" step="1" value="1"><span class="csr-v" id="ck-mode-v">Courier</span></div>
+          <div class="cx-slider-row"><label>Despacho courier neto (CLP/kit)</label><input type="range" id="ck-desp" min="20000" max="120000" step="1000" value="50633"><span class="csr-v" id="ck-desp-v">$50.633</span></div>
+        </div>
+        <div>
+          <h3 style="margin-bottom:14px">Desglose del kit (por bus)</h3>
+          <div class="cx-kv"><span class="kv-k">FOB cámaras (× cant., c/desc.)</span><span class="kv-v" id="ck-fob-cam">—</span></div>
+          <div class="cx-kv"><span class="kv-k">FOB host</span><span class="kv-v" id="ck-fob-host">—</span></div>
+          <div class="cx-kv"><span class="kv-k">Flete proporcional</span><span class="kv-v" id="ck-flete">—</span></div>
+          <div class="cx-kv"><span class="kv-k">Pago proveedor (CLP)</span><span class="kv-v" id="ck-pago">—</span></div>
+          <div class="cx-kv"><span class="kv-k">IVA internación</span><span class="kv-v" id="ck-ivam">—</span></div>
+          <div class="cx-kv"><span class="kv-k" id="ck-agente-k">Despacho / internación (por bus)</span><span class="kv-v" id="ck-agente">—</span></div>
+          <div class="cx-kv" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:12px"><span class="kv-k" style="font-weight:700">COSTO KIT POR BUS</span><span class="kv-v" id="ck-total" style="font-size:16px;color:var(--accent)">—</span></div>
+        </div>
+      </div>
+      <p class="cx-note" id="ck-note">Foorir: cámara HX-CCD22 US$225 (binocular) + host HX-M20 US$169 + flete US$60 (Alibaba #298353163501024648, total US$454). Internación courier calibrada con boleta UPS HV2525B7X7D: despacho neto $50.633 + IVA importación $81.608 (recuperable).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OPEX ══════════════════════════════════════════════ -->
+<div id="sec-opex" class="tab-section">
+  <div class="cx-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px">
+      <h3 style="margin-bottom:0">OPEX mensual — costo operacional recurrente</h3>
+      <button id="btn-amc" onclick="setAMC()" title="A Mínimo Costo: deja solo los ítems esenciales de tecnología" style="display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent-dim);color:var(--accent);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.04em">
+        <span style="font-size:15px">⚡</span> AMC
+      </button>
+    </div>
+    <p class="cx-sub">Define cantidad y precio unitario de cada ítem. Pon cantidad 0 en los que no apliquen desde el inicio. <strong>AMC</strong> = A Mínimo Costo: solo los ítems tecnológicos esenciales.</p>
+    <table class="cx-table">
+      <thead><tr><th>Ítem</th><th>P/U mensual (CLP)</th><th>Cantidad</th><th>Total / mes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Analista Ingeniero</td>
+          <td><input class="cx-in" id="op-ing-pu" value="1800000"></td>
+          <td><input class="cx-in" id="op-ing-q" value="1"></td>
+          <td class="cx-calc" id="op-ing-t">$0</td>
+        </tr>
+        <tr>
+          <td>Arriendo Oficina / Bodega / Ensamble</td>
+          <td><input class="cx-in" id="op-ofi-pu" value="800000"></td>
+          <td><input class="cx-in" id="op-ofi-q" value="1"></td>
+          <td class="cx-calc" id="op-ofi-t">$0</td>
+        </tr>
+        <tr>
+          <td>Leasing camioneta (técnico terreno)</td>
+          <td><input class="cx-in" id="op-cam-pu" value="550000"></td>
+          <td><input class="cx-in" id="op-cam-q" value="1"></td>
+          <td class="cx-calc" id="op-cam-t">$0</td>
+        </tr>
+        <tr>
+          <td>Técnico terreno</td>
+          <td><input class="cx-in" id="op-tec-pu" value="900000"></td>
+          <td><input class="cx-in" id="op-tec-q" value="1"></td>
+          <td class="cx-calc" id="op-tec-t">$0</td>
+        </tr>
+        <tr>
+          <td>Sueldo Socio Rodrigo Medina</td>
+          <td><input class="cx-in" id="op-rm-pu" value="1500000"></td>
+          <td><input class="cx-in" id="op-rm-q" value="1"></td>
+          <td class="cx-calc" id="op-rm-t">$0</td>
+        </tr>
+        <tr>
+          <td>Sueldo Socio Rodrigo Valladares</td>
+          <td><input class="cx-in" id="op-rv-pu" value="1500000"></td>
+          <td><input class="cx-in" id="op-rv-q" value="1"></td>
+          <td class="cx-calc" id="op-rv-t">$0</td>
+        </tr>
+        <tr>
+          <td>Sueldo Socio V&amp;R</td>
+          <td><input class="cx-in" id="op-vyr-pu" value="1500000"></td>
+          <td><input class="cx-in" id="op-vyr-q" value="1"></td>
+          <td class="cx-calc" id="op-vyr-t">$0</td>
+        </tr>
+        <tr>
+          <td>Correo + página institucional</td>
+          <td><input class="cx-in" id="op-web-pu" value="25000"></td>
+          <td><input class="cx-in" id="op-web-q" value="1"></td>
+          <td class="cx-calc" id="op-web-t">$0</td>
+        </tr>
+        <tr>
+          <td>Software, datos y servicios cloud — base</td>
+          <td><input class="cx-in" id="op-sw-pu" value="180000"></td>
+          <td><input class="cx-in" id="op-sw-q" value="1"></td>
+          <td class="cx-calc" id="op-sw-t">$0</td>
+        </tr>
+        <tr>
+          <td>Software / cloud — variable por bus</td>
+          <td><input class="cx-in" id="op-swb-pu" value="1200"></td>
+          <td class="cx-calc" id="op-swb-q">100</td>
+          <td class="cx-calc" id="op-swb-t">$0</td>
+        </tr>
+        <tr class="cx-tot-row"><td>OPEX total mensual</td><td></td><td></td><td class="cx-calc" id="op-total">$0</td></tr>
+      </tbody>
+    </table>
+    <p class="cx-note">Valores netos sin IVA. El ítem "Software, datos y cloud — base" consolida licencias, Google Cloud/BigQuery y servicios asociados (incluye servicios de IA prorrateados). El componente "variable por bus" escala con la flota: a más buses, más procesamiento y almacenamiento de datos.</p>
+  </div>
+</div>
+
+
+<!-- ══ SUMARIO ═══════════════════════════════════════════ -->
+<div id="sec-sumario" class="tab-section">
+  <div class="cx-grand" style="margin-bottom:22px">
+    <div><div class="cg-l">Resumen del proyecto</div><div class="cg-x" id="sum-flota">— buses</div></div>
+    <div style="text-align:right">
+      <div class="cg-v" id="sum-capex">$0</div>
+      <div class="cg-x">CAPEX total · <span id="sum-opex">$0</span>/mes OPEX</div>
+    </div>
+  </div>
+
+  <div class="cx-grid2">
+    <div class="cx-panel">
+      <h3>CAPEX — desglose</h3>
+      <div class="cx-kv"><span class="kv-k">Costo kit / bus (neto)</span><span class="kv-v" id="sum-kit">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Otros por-bus (cables, instal., enclosure)</span><span class="kv-v" id="sum-otros">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Subtotal por-bus (× flota)</span><span class="kv-v" id="sum-subbus">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Campaña de instalación (one-time)</span><span class="kv-v" id="sum-camp">—</span></div>
+      <div class="cx-kv" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:12px"><span class="kv-k" style="font-weight:700">CAPEX TOTAL</span><span class="kv-v" id="sum-capex2" style="color:var(--accent);font-size:15px">—</span></div>
+      <div class="cx-kv"><span class="kv-k">CAPEX por bus</span><span class="kv-v" id="sum-capexbus">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Días de campaña</span><span class="kv-v" id="sum-dias">—</span></div>
+    </div>
+    <div class="cx-panel">
+      <h3>OPEX — desglose mensual</h3>
+      <div id="sum-opex-list"></div>
+      <div class="cx-kv" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:12px"><span class="kv-k" style="font-weight:700">OPEX TOTAL / MES</span><span class="kv-v" id="sum-opex2" style="color:var(--warn);font-size:15px">—</span></div>
+      <div class="cx-kv"><span class="kv-k">OPEX por bus / mes</span><span class="kv-v" id="sum-opexbus">—</span></div>
+    </div>
+  </div>
+
+  <div class="cx-panel">
+    <h3>Indicadores clave (con datos de referencia del Evaluador)</h3>
+    <div class="cx-grid2">
+      <div>
+        <div class="cx-kv"><span class="kv-k">VAN estimado</span><span class="kv-v" id="sum-van">—</span></div>
+        <div class="cx-kv"><span class="kv-k">TIR</span><span class="kv-v" id="sum-tir">—</span></div>
+        <div class="cx-kv"><span class="kv-k">Payback</span><span class="kv-v" id="sum-payback">—</span></div>
+      </div>
+      <div>
+        <div class="cx-kv"><span class="kv-k">Ingreso mensual (neto)</span><span class="kv-v" id="sum-ing">—</span></div>
+        <div class="cx-kv"><span class="kv-k">Flujo neto / mes</span><span class="kv-v" id="sum-flujo">—</span></div>
+        <div class="cx-kv"><span class="kv-k">Prob. éxito (Montecarlo)</span><span class="kv-v" id="sum-prob">—</span></div>
+      </div>
+    </div>
+    <p class="cx-note">Los indicadores usan la tarifa y parámetros financieros definidos en el Evaluador. Ajusta ahí los supuestos de ingreso.</p>
+  </div>
+
+  <!-- Escenarios + Export -->
+  <div class="cx-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
+      <h3 style="margin-bottom:0">Escenarios y exportación</h3>
+      <button onclick="exportPDF()" style="display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent-dim);color:var(--accent);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.04em">
+        <span style="font-size:15px">🖨️</span> Exportar PDF
+      </button>
+    </div>
+    <p class="cx-sub">Guarda configuraciones con nombre para comparar (flota, plazo, tarifa, CAPEX, OPEX y resultados). Todo se guarda en este navegador; los inputs además se conservan al recargar.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <input id="scn-name" placeholder="Nombre del escenario (ej: Base 100 buses)" class="cx-in" style="flex:1;min-width:200px;text-align:left;font-family:var(--font);width:auto">
+      <button onclick="saveScenario()" style="padding:9px 16px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer">💾 Guardar escenario</button>
+    </div>
+    <div class="table-wrap">
+      <table class="cx-table" id="scn-table">
+        <thead><tr><th>Escenario</th><th>Flota</th><th>Plazo</th><th>Tarifa (UF/mes)</th><th>CAPEX</th><th>OPEX/mes</th><th>VAN</th><th>TIR</th><th>Payback</th><th></th></tr></thead>
+        <tbody id="scn-tbody"><tr><td colspan="10" style="text-align:center;color:var(--text3);padding:14px">Sin escenarios guardados aún.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EVALUADOR ══════════════════════════════════════════ -->
+<div id="sec-evaluador" class="tab-section">
+  <div class="main-grid">
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon" style="background:var(--accent-dim);color:var(--accent)">⚙</div>
+        <span class="panel-title">Variables del proyecto</span>
+      </div>
+      <div class="sliders-wrap">
+
+        <div class="section-sep">Operación</div>
+
+        <div class="slider-item" style="background:var(--accent-dim);border-left:3px solid var(--accent)">
+          <div class="slider-top" style="margin-bottom:8px">
+            <span class="slider-name" style="color:var(--text)">Flota de buses</span>
+            <input type="number" id="inp-flota" min="1" max="2000" value="3"
+              style="width:90px;font-family:var(--mono);font-size:17px;font-weight:700;color:var(--accent);text-align:right;border:none;border-bottom:2px solid var(--accent);background:transparent;outline:none;padding:2px 0"
+              oninput="onFlotaInput(this.value)">
+          </div>
+          <input type="range" id="sl-flota" min="1" max="2000" step="1" value="3"
+            oninput="onFlotaSlider(this.value)">
+          <div class="slider-limits"><span>1 bus</span><span>2.000</span></div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:5px">Base: Home (<span id="v-flota-home">3</span> buses) · editable aquí para sensibilizar</div>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-top">
+            <span class="slider-name">Plazo del contrato</span>
+            <span style="display:flex;align-items:baseline;gap:5px">
+              <input type="number" id="inp-plazo" min="1" max="120" value="24"
+                style="width:60px;font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text);text-align:right;border:none;border-bottom:1.5px solid var(--border2);background:transparent;outline:none;padding:2px 0"
+                oninput="onPlazoInput(this.value)">
+              <span style="font-size:12px;color:var(--text3)">meses</span>
+            </span>
+          </div>
+          <input type="range" id="sl-plazo" min="1" max="72" step="1" value="24" oninput="onPlazoSlider(this.value)">
+          <div class="slider-limits"><span>1m</span><span>72m (barra) · escribe hasta 120</span></div>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-top">
+            <span class="slider-name">Tarifa por bus / mes (UF)</span>
+            <span style="display:flex;align-items:baseline;gap:4px">
+              <input type="number" id="inp-tarifa" min="0" max="50" step="0.05" value="3.375"
+                style="width:84px;font-family:var(--mono);font-size:15px;font-weight:500;color:var(--text);text-align:right;border:none;border-bottom:1.5px solid var(--border2);background:transparent;outline:none;padding:2px 0"
+                oninput="onTarifaInput(this.value)">
+              <span style="font-size:13px;color:var(--text3)">UF/mes</span>
+            </span>
+          </div>
+          <input type="range" id="sl-tarifa" min="0.5" max="12" step="0.25" value="3.375" oninput="onTarifaSlider(this.value)">
+          <div class="slider-limits"><span>0,5 UF</span><span>12 UF (barra) · escribe hasta 50 UF/mes</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:7px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">
+            <span style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">Equivalente en pesos:</span>
+            <span id="v-tarifa-uf" style="font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent)">$135.000 /bus/mes</span>
+            <span style="font-size:10px;color:var(--text3)">(1 UF = $40.000)</span>
+          </div>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-top">
+            <span class="slider-name">Ramp-up de despliegue</span>
+            <span class="slider-val" id="v-ramp">0 meses</span>
+          </div>
+          <input type="range" id="sl-ramp" min="0" max="24" step="1" value="0">
+          <div class="slider-limits"><span>Inmediato</span><span>24m</span></div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:5px">Meses hasta operar la flota completa. El ingreso escala linealmente durante el despliegue.</div>
+        </div>
+
+        <div class="section-sep">Costos</div>
+
+        <div class="slider-item" style="background:var(--warn-dim);border-left:3px solid var(--warn)">
+          <div class="slider-top" style="margin-bottom:4px">
+            <span class="slider-name" style="color:var(--text)">OPEX mensual</span>
+            <span class="slider-val" id="v-opex" style="color:var(--warn);font-weight:700">$9.000.000</span>
+          </div>
+          <input type="range" id="sl-opex" min="1000000" max="20000000" step="500000" value="9000000" style="display:none">
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Vinculado a pestaña OPEX · edita allí</div>
+        </div>
+
+        <div class="slider-item" style="background:var(--blue-dim);border-left:3px solid var(--blue)">
+          <div class="slider-top" style="margin-bottom:4px">
+            <span class="slider-name" style="color:var(--text)">Costo por bus (CAPEX)</span>
+            <span class="slider-val" id="v-capexbus" style="color:var(--blue);font-weight:700">$746.500</span>
+          </div>
+          <input type="range" id="sl-capexbus" min="300000" max="1500000" step="50000" value="746500" style="display:none">
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Vinculado a pestaña CAPEX · edita allí</div>
+        </div>
+
+        <div class="section-sep">Financiamiento</div>
+
+        <div class="slider-item">
+          <div class="slider-top">
+            <span class="slider-name">Tasa de descuento</span>
+            <span class="slider-val" id="v-tdesc">1,0% / mes</span>
+          </div>
+          <input type="range" id="sl-tdesc" min="1" max="30" step="1" value="10">
+          <div class="slider-limits"><span>1%</span><span>30%</span></div>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-top">
+            <span class="slider-name">Plazo del crédito</span>
+            <span class="slider-val" id="v-pcred">12 meses</span>
+          </div>
+          <input type="range" id="sl-pcred" min="0" max="48" step="6" value="12">
+          <div class="slider-limits"><span>Sin crédito</span><span>48m</span></div>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-top">
+            <span class="slider-name">Interés del crédito</span>
+            <span class="slider-val" id="v-icred">30% / año</span>
+          </div>
+          <input type="range" id="sl-icred" min="5" max="60" step="5" value="30">
+          <div class="slider-limits"><span>5%</span><span>60%</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="metrics-grid">
+        <div class="metric-card" id="mc-van"><div class="metric-label">VAN</div><div class="metric-value" id="mv-van">—</div><div class="metric-sub" id="ms-van">Valor actual neto</div></div>
+        <div class="metric-card" id="mc-tir"><div class="metric-label">TIR</div><div class="metric-value" id="mv-tir">—</div><div class="metric-sub" id="ms-tir">Tasa interna retorno</div></div>
+        <div class="metric-card" id="mc-payback"><div class="metric-label">Payback</div><div class="metric-value" id="mv-payback">—</div><div class="metric-sub">Período recuperación</div></div>
+        <div class="metric-card is-blue" id="mc-flujo"><div class="metric-label">Flujo neto / mes</div><div class="metric-value" id="mv-flujo">—</div><div class="metric-sub" id="ms-flujo">Ingreso − OPEX</div></div>
+        <div class="metric-card is-blue"><div class="metric-label">Ingreso mensual</div><div class="metric-value" id="mv-ingreso">—</div><div class="metric-sub" id="ms-ingreso">Bruto</div></div>
+        <div class="metric-card"><div class="metric-label">CAPEX total</div><div class="metric-value" id="mv-capex">—</div><div class="metric-sub">Inversión inicial</div></div>
+        <div class="metric-card" id="mc-cuota"><div class="metric-label">Cuota crédito / mes</div><div class="metric-value" id="mv-cuota">—</div><div class="metric-sub" id="ms-cuota">Sistema francés</div></div>
+        <div class="metric-card" id="mc-margen"><div class="metric-label">Margen operacional</div><div class="metric-value" id="mv-margen">—</div><div class="metric-sub">Sobre ingreso bruto</div></div>
+      </div>
+
+      <div class="chart-panel">
+        <div class="chart-panel-header">
+          <span class="chart-panel-title">Flujo de caja</span>
+          <div class="tab-group">
+            <button class="tab-btn active" id="tab-acum" onclick="setTab('acum')">Acumulado</button>
+            <button class="tab-btn" id="tab-mens" onclick="setTab('mens')">Mensual</button>
+            <button class="tab-btn" id="tab-van" onclick="setTab('van')">VAN incremental</button>
+          </div>
+        </div>
+        <div class="chart-legend" id="chart-legend"></div>
+        <div class="chart-area"><div class="chart-canvas-wrap"><canvas id="chart-main"></canvas></div></div>
+      </div>
+
+      <div class="bottom-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background:var(--blue-dim);color:var(--blue)">≡</div>
+            <span class="panel-title">Tabla de flujos</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mes</th><th>Ingreso</th><th>Egreso</th><th>Flujo</th><th>Acumulado</th></tr></thead>
+              <tbody id="tabla-flujos"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="scenario-panel">
+          <div class="scenario-title">Diagnóstico del proyecto</div>
+          <div id="scenario-box"></div>
+          <div class="kpi-row" id="kpi-row"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MONTECARLO ════════════════════════════════════════ -->
+<div id="sec-montecarlo" class="tab-section">
+
+  <div class="mc-intro">
+    <div class="mc-intro-icon">🎲</div>
+    <div class="mc-intro-text">
+      <h3>Análisis de Montecarlo — Cuantificación del riesgo</h3>
+      <p>Define el rango posible de cada variable. El modelo simula <strong>10.000 escenarios aleatorios</strong> y calcula la probabilidad real de que el proyecto sea rentable, mostrando la distribución completa del VAN. Los parámetros fijos (plazo, crédito) se toman del evaluador.</p>
+    </div>
+  </div>
+
+  <div class="mc-grid">
+
+    <div>
+      <div class="mc-var-panel">
+        <div class="panel-header">
+          <div class="panel-icon" style="background:var(--purple-dim);color:var(--purple)">±</div>
+          <span class="panel-title">Rangos de incertidumbre</span>
+        </div>
+
+        <div class="mc-var-item">
+          <div class="mc-var-header"><span class="mc-var-name">Flota de buses</span><span class="mc-var-type">Uniforme</span></div>
+          <div class="mc-range-row">
+            <input class="mc-range-input" id="mc-flota-min" type="number" value="3" min="1" max="1990" oninput="window.__MC_FLOTA_TOUCHED__=true">
+            <span class="mc-range-sep">→</span>
+            <input class="mc-range-input" id="mc-flota-max" type="number" value="10" min="1" max="2000" oninput="window.__MC_FLOTA_TOUCHED__=true">
+          </div>
+          <div class="mc-range-labels"><span>mínimo (buses)</span><span>máximo (buses)</span></div>
+        </div>
+
+        <div class="mc-var-item">
+          <div class="mc-var-header"><span class="mc-var-name">Tarifa por bus / mes (UF)</span><span class="mc-var-type">Normal</span></div>
+          <div class="mc-range-row">
+            <input class="mc-range-input" id="mc-tarifa-min" type="number" value="2.625" step="0.25">
+            <span class="mc-range-sep">→</span>
+            <input class="mc-range-input" id="mc-tarifa-max" type="number" value="4.5" step="0.25">
+          </div>
+          <div class="mc-range-labels"><span>pesimista (UF/mes)</span><span>optimista (UF/mes)</span></div>
+        </div>
+
+        <div class="mc-var-item">
+          <div class="mc-var-header"><span class="mc-var-name">OPEX mensual</span><span class="mc-var-type">Normal</span></div>
+          <div class="mc-range-row">
+            <input class="mc-range-input" id="mc-opex-min" type="number" value="7000000" step="500000" oninput="window.__MC_OPEX_TOUCHED__=true">
+            <span class="mc-range-sep">→</span>
+            <input class="mc-range-input" id="mc-opex-max" type="number" value="12000000" step="500000" oninput="window.__MC_OPEX_TOUCHED__=true">
+          </div>
+          <div class="mc-range-labels"><span>optimista ($)</span><span>pesimista ($)</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)">Sugerido ±15% del OPEX calculado · editable</div>
+        </div>
+
+        <div class="mc-var-item">
+          <div class="mc-var-header"><span class="mc-var-name">OPEX imprevistos (% extra)</span><span class="mc-var-type">Uniforme</span></div>
+          <div class="mc-range-row">
+            <input class="mc-range-input" id="mc-cont-min" type="number" value="10" min="0" max="200" step="5">
+            <span class="mc-range-sep">→</span>
+            <input class="mc-range-input" id="mc-cont-max" type="number" value="100" min="0" max="300" step="5">
+          </div>
+          <div class="mc-range-labels"><span>mínimo (% del OPEX)</span><span>máximo (% del OPEX)</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)">Costo operativo extra por imprevistos. Se suma un % aleatorio del OPEX del proyecto en cada escenario. Rango 10%–100% por defecto, editable.</div>
+        </div>
+
+        <div class="mc-var-item">
+          <div class="mc-var-header"><span class="mc-var-name">Costo por bus (CAPEX)</span><span class="mc-var-type">Normal</span></div>
+          <div class="mc-range-row">
+            <input class="mc-range-input" id="mc-capex-min" type="number" value="600000" step="50000" oninput="window.__MC_CAPEX_TOUCHED__=true">
+            <span class="mc-range-sep">→</span>
+            <input class="mc-range-input" id="mc-capex-max" type="number" value="900000" step="50000" oninput="window.__MC_CAPEX_TOUCHED__=true">
+          </div>
+          <div class="mc-range-labels"><span>optimista ($)</span><span>pesimista ($)</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)">Sugerido ±15% del CAPEX/bus calculado · editable</div>
+        </div>
+
+        <div class="mc-var-item">
+          <div class="mc-var-header"><span class="mc-var-name">Tasa crédito (%/año)</span><span class="mc-var-type">Uniforme</span></div>
+          <div class="mc-range-row">
+            <input class="mc-range-input" id="mc-icred-min" type="number" value="20" min="0" max="80" step="1" oninput="window.__MC_ICRED_TOUCHED__=true">
+            <span class="mc-range-sep">→</span>
+            <input class="mc-range-input" id="mc-icred-max" type="number" value="40" min="0" max="100" step="1" oninput="window.__MC_ICRED_TOUCHED__=true">
+          </div>
+          <div class="mc-range-labels"><span>mínimo (%/año)</span><span>máximo (%/año)</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)">Auto ±10pp del evaluador · editable</div>
+        </div>
+
+      </div>
+
+      <button class="mc-run-btn" id="mc-run-btn" onclick="runMontecarlo()">
+        <span id="mc-btn-icon">🎲</span>
+        <span id="mc-btn-text">Simular 10.000 escenarios</span>
+      </button>
+
+      <div class="mc-fixed">
+        <div class="mc-fixed-title">Parámetros fijos (del evaluador)</div>
+        <div id="mc-fixed-params" style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);font-family:var(--mono)"></div>
+      </div>
+    </div>
+
+    <div class="mc-results">
+      <div id="mc-empty-state" class="mc-empty">
+        <div class="mc-empty-icon">🎲</div>
+        <div style="font-size:14px;color:var(--text3)">Configura los rangos y ejecuta la simulación para ver la distribución de resultados posibles</div>
+      </div>
+
+      <div id="mc-results-content" style="display:none;flex-direction:column;gap:20px">
+
+        <div class="mc-metrics">
+          <div class="mc-metric"><div class="mc-metric-label">VAN Promedio</div><div class="mc-metric-value" id="mc-van-mean">—</div><div class="mc-metric-sub">10.000 escenarios</div></div>
+          <div class="mc-metric"><div class="mc-metric-label">VAN Mediana (P50)</div><div class="mc-metric-value" id="mc-van-med" style="color:var(--blue)">—</div><div class="mc-metric-sub">mitad de escenarios</div></div>
+          <div class="mc-metric"><div class="mc-metric-label">Desv. Estándar</div><div class="mc-metric-value" id="mc-van-std" style="color:var(--gold)">—</div><div class="mc-metric-sub">dispersión de riesgo</div></div>
+          <div class="mc-metric"><div class="mc-metric-label">Peor escenario</div><div class="mc-metric-value" id="mc-van-min" style="color:var(--red)">—</div><div class="mc-metric-sub">VAN mínimo</div></div>
+          <div class="mc-metric"><div class="mc-metric-label">Mejor escenario</div><div class="mc-metric-value" id="mc-van-max" style="color:var(--accent)">—</div><div class="mc-metric-sub">VAN máximo</div></div>
+          <div class="mc-metric"><div class="mc-metric-label">Rango total</div><div class="mc-metric-value" id="mc-van-rango" style="color:var(--warn)">—</div><div class="mc-metric-sub">máx − mín</div></div>
+        </div>
+
+        <div class="mc-prob-wrap">
+          <div class="mc-prob-title">Probabilidad de rentabilidad (VAN &gt; 0)</div>
+          <div class="mc-prob-main">
+            <div class="mc-prob-circle" id="mc-prob-circle"><span id="mc-prob-pct">—</span></div>
+            <div class="mc-prob-desc" id="mc-prob-desc">—</div>
+          </div>
+          <div class="mc-bar-row">
+            <div class="mc-bar-label"><span style="color:var(--accent)">✓ VAN positivo (rentable)</span><span id="mc-bar-pos-val">—</span></div>
+            <div class="mc-bar-track"><div class="mc-bar-fill" id="mc-bar-pos" style="background:var(--accent);width:0%"></div></div>
+          </div>
+          <div class="mc-bar-row">
+            <div class="mc-bar-label"><span style="color:var(--gold)">△ VAN marginal (cerca de cero)</span><span id="mc-bar-marg-val">—</span></div>
+            <div class="mc-bar-track"><div class="mc-bar-fill" id="mc-bar-marg" style="background:var(--gold);width:0%"></div></div>
+          </div>
+          <div class="mc-bar-row">
+            <div class="mc-bar-label"><span style="color:var(--red)">✗ VAN negativo (pérdida)</span><span id="mc-bar-neg-val">—</span></div>
+            <div class="mc-bar-track"><div class="mc-bar-fill" id="mc-bar-neg" style="background:var(--red);width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="mc-dist-wrap">
+          <div class="mc-dist-header">
+            <span class="mc-dist-title">Distribución del VAN</span>
+            <span class="mc-dist-sub" id="mc-dist-sub">10.000 simulaciones</span>
+          </div>
+          <div class="mc-dist-canvas"><canvas id="mc-hist-chart"></canvas></div>
+          <div class="mc-percentiles" id="mc-percentiles"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ OBJETIVO ════════════════════════════════════════ -->
+<div id="sec-objetivo" class="tab-section">
+
+  <div class="obj-intro">
+    <div class="obj-intro-icon">🎯</div>
+    <div class="obj-intro-text">
+      <h3>Escenario Objetivo — Ingeniería inversa del VAN</h3>
+      <p>Define el VAN que quieres alcanzar e ingresa flota, plazo y tarifa. Elige qué variable resolver: el solver calcula <strong>flota</strong>, <strong>plazo</strong> o <strong>tarifa</strong> mínima necesaria para alcanzar el objetivo, dejando las otras dos fijas. El gráfico muestra el espacio factible.</p>
+    </div>
+  </div>
+
+  <div class="obj-layout">
+
+    <!-- PANEL CONTROL -->
+    <div class="obj-ctrl">
+
+      <!-- VAN OBJETIVO -->
+      <div class="obj-section">
+        <div class="obj-label">VAN objetivo</div>
+        <div class="obj-van-display" id="obj-van-disp">$120M</div>
+        <div class="obj-van-sub">Meta de valor actual neto</div>
+        <input type="range" id="sl-van-objetivo" min="0" max="500" step="5" value="120" style="accent-color:var(--gold)">
+        <div class="slider-limits"><span>$0</span><span>$500M</span></div>
+      </div>
+
+      <!-- SOLVER: 3 campos + 3 botones -->
+      <div class="obj-section">
+        <div class="obj-label">Variables del solver</div>
+        <p style="font-size:11px;color:var(--text3);margin:-4px 0 12px;line-height:1.5">
+          Ingresa los valores y elige qué resolver. El solver calcula la variable seleccionada para alcanzar el VAN objetivo, dejando las otras dos fijas.
+        </p>
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+          <div class="obj-solve-field" id="fld-flota">
+            <label>Flota de buses</label>
+            <input type="number" id="obj-in-flota" value="100" min="1" max="5000" step="1">
+            <span class="obj-solve-tag" id="tag-flota"></span>
+          </div>
+          <div class="obj-solve-field" id="fld-plazo">
+            <label>Plazo (meses)</label>
+            <input type="number" id="obj-in-plazo" value="24" min="1" max="120" step="1">
+            <span class="obj-solve-tag" id="tag-plazo"></span>
+          </div>
+          <div class="obj-solve-field" id="fld-tarifa">
+            <label>Tarifa (UF/bus/mes)</label>
+            <input type="number" id="obj-in-tarifa" value="3.375" min="0.05" max="50" step="0.05">
+            <span class="obj-solve-tag" id="tag-tarifa"></span>
+          </div>
+        </div>
+
+        <div class="obj-label">¿Qué variable resolver?</div>
+        <div class="obj-mode-row">
+          <button class="obj-mode-btn" id="mode-flota" onclick="setObjMode('flota')">🚌 Resolver<br>flota</button>
+          <button class="obj-mode-btn active" id="mode-plazo" onclick="setObjMode('plazo')">📅 Resolver<br>plazo</button>
+          <button class="obj-mode-btn" id="mode-tarifa" onclick="setObjMode('tarifa')">💲 Resolver<br>tarifa</button>
+        </div>
+
+        <div class="obj-computed" style="margin-top:14px">
+          <div class="obj-computed-label" id="obj-solve-label">Plazo mínimo requerido</div>
+          <div class="obj-computed-val" id="obj-solve-val" style="color:var(--gold)">—</div>
+          <div class="obj-computed-sub" id="obj-solve-sub">para alcanzar el VAN objetivo</div>
+        </div>
+      </div>
+
+      <!-- RESULTADOS DEL SOLVER -->
+      <div class="obj-section">
+        <div class="obj-label">Resultado del solver</div>
+        <div id="obj-status-box"></div>
+        <div class="obj-result-cards">
+          <div class="obj-rc"><div class="obj-rc-lbl">Tarifa actual</div><div class="obj-rc-val" id="obj-rc-tarifa" style="color:var(--blue)">—</div><div class="obj-rc-sub">UF por bus / mes</div></div>
+          <div class="obj-rc"><div class="obj-rc-lbl">VAN proyectado</div><div class="obj-rc-val" id="obj-rc-van" style="color:var(--accent)">—</div><div class="obj-rc-sub">con solución</div></div>
+          <div class="obj-rc"><div class="obj-rc-lbl">Ingreso mensual</div><div class="obj-rc-val" id="obj-rc-ingreso" style="color:var(--blue)">—</div><div class="obj-rc-sub">bruto</div></div>
+          <div class="obj-rc"><div class="obj-rc-lbl">Margen operac.</div><div class="obj-rc-val" id="obj-rc-margen" style="color:var(--accent)">—</div><div class="obj-rc-sub">sobre ingreso</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- GRÁFICO ESPACIO FACTIBLE -->
+    <div class="obj-chart-panel">
+      <div class="obj-chart-header">
+        <div>
+          <div class="obj-chart-title">Espacio factible — Flota × Plazo</div>
+          <div class="obj-chart-sub" id="obj-chart-sub">Curva de indiferencia para el VAN objetivo</div>
+        </div>
+        <div class="obj-chart-legend">
+          <div class="obj-leg-item"><span class="obj-leg-dot" style="background:var(--accent);opacity:.5"></span>Supera objetivo</div>
+          <div class="obj-leg-item"><span class="obj-leg-dot" style="background:var(--red);opacity:.5"></span>No alcanza</div>
+          <div class="obj-leg-item"><span class="obj-leg-line" style="background:var(--gold)"></span>Frontera exacta</div>
+          <div class="obj-leg-item"><span class="obj-leg-dot" style="background:var(--purple);border:2px solid var(--purple)"></span>Solución solver</div>
+        </div>
+      </div>
+      <div class="obj-canvas-wrap"><canvas id="obj-chart"></canvas></div>
+      <div class="obj-info-strip">
+        <div class="obj-strip-card"><div class="obj-strip-lbl">Punto solver</div><div class="obj-strip-val" id="obj-strip-punto" style="color:var(--purple)">—</div></div>
+        <div class="obj-strip-card"><div class="obj-strip-lbl">Escenarios factibles</div><div class="obj-strip-val" id="obj-strip-factibles" style="color:var(--accent)">—</div></div>
+        <div class="obj-strip-card"><div class="obj-strip-lbl">Flota mín. factible</div><div class="obj-strip-val" id="obj-strip-flotamin" style="color:var(--gold)">—</div></div>
+        <div class="obj-strip-card"><div class="obj-strip-lbl">Plazo mín. factible</div><div class="obj-strip-val" id="obj-strip-plazomin" style="color:var(--gold)">—</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span>Fluxus Insight · Evaluador Financiero · Proyecto Buses</span>
+  <span>OPEX fijo + CAPEX variable por bus · Crédito sistema francés · 10.000 iteraciones</span>
+</footer>
+</div>
+</main>
+</div><!--/app-shell-->
+
+<script>
+// ══════════════════════════════════════════════
+// SHARED UTILS
+// ══════════════════════════════════════════════
+function cuotaFrances(P,r,n){if(n===0)return 0;if(r<0.00001)return P/n;return P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);}
+function calcVAN(flujos,r){return flujos.reduce((s,f,i)=>s+f/Math.pow(1+r,i),0);}
+function calcTIR(flujos){
+  const hasPos=flujos.slice(1).some(f=>f>0),hasNeg=flujos.some(f=>f<0);
+  if(!hasPos||!hasNeg)return null;
+  let lo=-0.9999,hi=10;
+  const npv=r=>flujos.reduce((s,f,t)=>s+f/Math.pow(1+r,t),0);
+  if(npv(lo)*npv(hi)>0)return null;
+  for(let i=0;i<300;i++){const mid=(lo+hi)/2;npv(mid)>0?lo=mid:hi=mid;if(Math.abs(hi-lo)<1e-9)break;}
+  return(lo+hi)/2;
+}
+function fmtCLP(n,short=false){
+  const abs=Math.abs(n);let s;
+  if(short){
+    if(abs>=1e9)s=(abs/1e9).toFixed(1)+'B';
+    else if(abs>=1e6)s=(abs/1e6).toFixed(1)+'M';
+    else if(abs>=1e3)s=(abs/1e3).toFixed(0)+'K';
+    else s=Math.round(abs).toLocaleString('es-CL');
+  }else{
+    if(abs>=1e6)s=(abs/1e6).toFixed(2)+'M';
+    else s=Math.round(abs).toLocaleString('es-CL');
+  }
+  return(n<0?'-':'')+'$'+s;
+}
+
+// ══════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════
+const ALL_SECS=['home','capex','opex','sumario','evaluador','montecarlo','objetivo'];
+const SEC_TITLE={
+  home:['Home','Resumen del modelo y tamaño de flota.'],
+  capex:['CAPEX del proyecto','Inversión inicial: kits, instalación y campaña de despliegue.'],
+  opex:['OPEX mensual','Costo operacional recurrente del negocio.'],
+  sumario:['Sumario','Resumen consolidado de CAPEX, OPEX e indicadores.'],
+  evaluador:['Evaluador de Rentabilidad','VAN, TIR, payback y flujo de caja.'],
+  montecarlo:['Análisis de Montecarlo','Probabilidad de éxito sobre 10.000 escenarios.'],
+  objetivo:['Escenario Objetivo','Qué se necesita para alcanzar un VAN meta.']
+};
+
+function navTo(sec){
+  ALL_SECS.forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el) el.classList.toggle('active',s===sec);
+  });
+  document.querySelectorAll('.sb-link').forEach(b=>b.classList.toggle('active',b.dataset.sec===sec));
+  const t=SEC_TITLE[sec]||['',''];
+  const pt=document.getElementById('page-title'), ps=document.getElementById('page-sub');
+  if(pt)pt.textContent=t[0]; if(ps)ps.textContent=t[1];
+  if(sec==='opex'){ recalcOpex(); pushToEvaluador(); }
+  if(sec==='montecarlo')updateMCFixed();
+  if(sec==='objetivo')updateObjetivo();
+  if(sec==='evaluador')update();
+  if(sec==='sumario'){ if(typeof update==='function')update(); refreshSumario(); }
+  if(sec==='home') refreshHome();
+  window.scrollTo(0,0);
+}
+// compat: showSection sigue existiendo por si lo llama código viejo
+function showSection(sec){ navTo(sec); }
+
+// ══════════════════════════════════════════════
+// ESTADO GLOBAL DE FLOTA
+// ══════════════════════════════════════════════
+function getFlota(){
+  let f=parseInt(document.getElementById('home-flota').value)||1;
+  return Math.max(1,f);
+}
+function syncFlota(){
+  const f=getFlota();
+  // slider hidden del evaluador (para getVals())
+  const sl=document.getElementById('sl-flota');
+  if(sl){ sl.value=Math.min(f, +sl.max); }
+  // input numérico y slider visible
+  const inp=document.getElementById('inp-flota');
+  if(inp && document.activeElement!==inp) inp.value=f;
+  const fh=document.getElementById('v-flota-home');
+  if(fh) fh.textContent=f.toLocaleString('es-CL');
+  const hf=document.getElementById('hdr-flota'); if(hf) hf.textContent=f.toLocaleString('es-CL')+' buses';
+  const c1=document.getElementById('cx-flota-1'); if(c1) c1.textContent=f.toLocaleString('es-CL');
+  document.querySelectorAll('#cx-kit-q,#cx-cab-q,#cx-ins-q,#cx-enc-q').forEach(e=>e.textContent=f.toLocaleString('es-CL'));
+  if(typeof update==='function') update();
+}
+
+// Flota editable desde evaluador (sensibilización local, no toca Home)
+function onFlotaInput(val){
+  const f=Math.max(1,Math.min(2000,parseInt(val)||1));
+  const sl=document.getElementById('sl-flota'); if(sl) sl.value=f;
+  if(typeof update==='function') update();
+}
+function onFlotaSlider(val){
+  const f=+val;
+  const inp=document.getElementById('inp-flota'); if(inp) inp.value=f;
+  if(typeof update==='function') update();
+}
+
+// ══════════════════════════════════════════════
+// COTIZACIONES — lógica replicada del Excel CAPEX
+// ══════════════════════════════════════════════
+let PROV='foorir';
+const PROV_DATA={
+  foorir:{ fobCam:225, fobHost:169, fleteCot:60, artCot:2,
+           note:'Foorir: cámara HX-CCD22 US$225 (binocular/estéreo 3D) + host HX-M20 US$169 + flete US$60 (receipt Alibaba #298353163501024648, total US$454). Internación courier calibrada con boleta UPS HV2525B7X7D: despacho neto $50.633 + IVA importación $81.608 (recuperable).' },
+  alway:{  fobCam:0,  fobHost:0,  fobKit:453, fleteCot:60, artCot:3, cables:12,
+           note:'AlwayCare PC26: kit cerrado US$453 (MDVR + 2 cám APC monocular + DMS) + cables ≈US$12. Flete asumido = Foorir (confirmar).' }
+};
+
+function setProv(p){
+  PROV=p;
+  document.getElementById('pb-foorir').classList.toggle('active',p==='foorir');
+  document.getElementById('pb-alway').classList.toggle('active',p==='alway');
+  document.getElementById('ck-note').innerHTML = PROV_DATA[p].note;
+  recalcCotiz();
+}
+
+function recalcCotiz(){
+  const TC=+document.getElementById('ck-tc').value;
+  const IVA=+document.getElementById('ck-iva').value/100;
+  const RECUP=+document.getElementById('ck-recup').value;
+  const NCAM=+document.getElementById('ck-cam').value;
+  const DESC=+document.getElementById('ck-desc').value/100;
+  const EMB=+document.getElementById('ck-emb').value;
+  const MODE=+document.getElementById('ck-mode').value;   // 0=consolidado, 1=courier
+  const DESP=+document.getElementById('ck-desp').value;   // despacho courier neto CLP/kit (boleta UPS)
+  document.getElementById('ck-tc-v').textContent=TC;
+  document.getElementById('ck-iva-v').textContent=(IVA*100).toFixed(0)+'%';
+  document.getElementById('ck-recup-v').textContent=RECUP?'Sí':'No';
+  document.getElementById('ck-cam-v').textContent=NCAM;
+  document.getElementById('ck-desc-v').textContent=(DESC*100).toFixed(0)+'%';
+  document.getElementById('ck-emb-v').textContent=EMB;
+  document.getElementById('ck-mode-v').textContent=MODE?'Courier':'Consolidado';
+  document.getElementById('ck-desp-v').textContent='$'+DESP.toLocaleString('es-CL');
+
+  // mini-tabla aduana (mismos defaults del Excel)
+  const HON_MIN=100000, HON_PCT=0.005, GASTOS_DESP=120000;
+
+  const d=PROV_DATA[PROV];
+  let fobCamTot, fobHost, artef, flete;
+  if(PROV==='foorir'){
+    fobCamTot = d.fobCam*NCAM*(1-DESC);
+    fobHost   = d.fobHost*(1-DESC);
+    artef     = NCAM + 1;                       // cámaras + 1 host
+    flete     = (d.fleteCot/d.artCot)*artef;     // proporcional US$/artefacto
+  } else {
+    // AlwayCare PC26: kit cerrado por bus + cables
+    fobCamTot = d.fobKit*(1-DESC);
+    fobHost   = d.cables;                         // cables como extra del kit
+    artef     = d.artCot;
+    flete     = (d.fleteCot/2)*artef;            // mismo criterio proporcional
+  }
+  const fobBus = fobCamTot + fobHost;            // US$
+  const cifBus = fobBus + flete;                 // US$
+  const pagoCLP = cifBus*TC;
+  const ivaCLP  = pagoCLP*IVA;                    // IVA de importación s/ CIF (recuperable como crédito fiscal)
+  // Despacho / internación por bus, según modo:
+  //  - Courier (piloto): cobro neto fijo por kit, calibrado a boleta UPS HV2525B7X7D ($50.633 neto).
+  //  - Consolidado (escala): agente de aduana prorrateado (MAX(min ; %·CIF_embarque) + gastos) / buses_embarque.
+  const cifEmbCLP = cifBus*TC*EMB;
+  const despachoBus = MODE===1
+        ? DESP
+        : (Math.max(HON_MIN, cifEmbCLP*HON_PCT)+GASTOS_DESP)/EMB;
+  const ivaDespCLP = despachoBus*IVA;             // IVA del servicio de despacho (también recuperable)
+  // El IVA (importación + servicio) solo entra al costo si NO se recupera.
+  const costoKit = pagoCLP + despachoBus + (RECUP? 0 : ivaCLP + ivaDespCLP);
+
+  const f0=n=>'$'+Math.round(n).toLocaleString('es-CL');
+  const u0=n=>'US$'+Math.round(n).toLocaleString('es-CL');
+  document.getElementById('ck-fob-cam').textContent=u0(fobCamTot);
+  document.getElementById('ck-fob-host').textContent=u0(fobHost);
+  document.getElementById('ck-flete').textContent=u0(flete);
+  document.getElementById('ck-pago').textContent=f0(pagoCLP);
+  // IVA total de internación (importación + servicio despacho). Recuperable por defecto.
+  const ivaTotalCLP = ivaCLP + ivaDespCLP;
+  document.getElementById('ck-ivam').textContent=f0(ivaTotalCLP)+(RECUP?' (crédito fiscal)':' (al costo)');
+  document.getElementById('ck-agente-k').textContent = MODE===1
+        ? 'Despacho courier neto (por bus)'
+        : 'Agente aduana consolidado (por bus)';
+  document.getElementById('ck-agente').textContent=f0(despachoBus);
+  document.getElementById('ck-total').textContent=f0(costoKit);
+
+  // valores en botones de proveedor (referenciales con params actuales)
+  document.getElementById('pb-foorir-v').textContent = PROV==='foorir'? f0(costoKit) : '—';
+  document.getElementById('pb-alway-v').textContent  = PROV==='alway'?  f0(costoKit) : '—';
+
+  // este costo alimenta el CAPEX
+  window.__COSTO_KIT__ = costoKit;
+  document.getElementById('cx-kit-pu').value = Math.round(costoKit);
+  recalcCapex();
+}
+
+// ══════════════════════════════════════════════
+// CAPEX
+// ══════════════════════════════════════════════
+function gv(id){ return parseFloat(document.getElementById(id).value)||0; }
+
+function flotaActiva(){
+  // CAPEX usa flota local; si no, la global de Home
+  const loc=document.getElementById('cx-flota-local');
+  if(loc && loc.value && parseInt(loc.value)>0) return Math.max(1,parseInt(loc.value));
+  return getFlota();
+}
+
+function recalcCapex(){
+  const F=flotaActiva();
+  const f0=n=>'$'+Math.round(n).toLocaleString('es-CL');
+  const fa=document.getElementById('cx-flota-local');
+
+  // ---- por bus ----
+  const kitPU = window.__COSTO_KIT__ || 0;
+  const cabPU = gv('cx-cab-pu'), insPU=gv('cx-ins-pu'), encPU=gv('cx-enc-pu');
+  const kitT=kitPU*F, cabT=cabPU*F, insT=insPU*F, encT=encPU*F;
+  ['cx-kit-q','cx-cab-q','cx-ins-q','cx-enc-q'].forEach(id=>document.getElementById(id).textContent=F.toLocaleString('es-CL'));
+  document.getElementById('cx-kit-pu').value=Math.round(kitPU);
+  document.getElementById('cx-kit-t').textContent=f0(kitT);
+  document.getElementById('cx-cab-t').textContent=f0(cabT);
+  document.getElementById('cx-ins-t').textContent=f0(insT);
+  document.getElementById('cx-enc-t').textContent=f0(encT);
+  const subBus=kitT+cabT+insT+encT;
+  document.getElementById('cx-sub-bus').textContent=f0(subBus);
+
+  // ---- campaña ----
+  const nInst=Math.max(1,gv('cx-ninst'));
+  const prod=Math.max(0.1,gv('cx-prod'));
+  const instCam=Math.max(1,gv('cx-inst-cam'));
+  const instSup=Math.max(1,gv('cx-inst-sup'));
+  const dias=Math.ceil(F/(nInst*prod));
+  const nCam=Math.ceil(nInst/instCam);
+  const nSup=Math.ceil(nInst/instSup);
+
+  document.getElementById('cx-dias').textContent=dias+' días';
+  // instaladores a trato = ya contabilizado en "instalación por bus" (insT)
+  document.getElementById('cx-trato-q').textContent=F.toLocaleString('es-CL')+' buses';
+  document.getElementById('cx-trato-t').textContent=f0(insT)+' (en por-bus ↑)';
+
+  document.getElementById('cx-her-q').textContent=nInst;
+  document.getElementById('cx-nb-q').textContent=nInst;
+  document.getElementById('cx-sup-q').textContent=dias+'d × '+nSup;
+  document.getElementById('cx-veh-q').textContent=dias+'d × '+nCam;
+
+  const herT=gv('cx-her-pu')*nInst, nbT=gv('cx-nb-pu')*nInst;
+  const nAnalistas=Math.max(0,gv('op-ing-q'));
+  const pcaT=gv('cx-pca-pu')*nAnalistas;
+  document.getElementById('cx-pca-q').textContent=nAnalistas;
+  document.getElementById('cx-pca-t').textContent=f0(pcaT);
+  const supT=gv('cx-sup-pu')*dias*nSup, vehT=gv('cx-veh-pu')*dias*nCam;
+  const trasT=gv('cx-tras-pu');
+  document.getElementById('cx-her-t').textContent=f0(herT);
+  document.getElementById('cx-nb-t').textContent=f0(nbT);
+  document.getElementById('cx-sup-t').textContent=f0(supT);
+  document.getElementById('cx-veh-t').textContent=f0(vehT);
+  document.getElementById('cx-tras-t').textContent=f0(trasT);
+  const subCamp=herT+nbT+pcaT+supT+vehT+trasT;
+  document.getElementById('cx-sub-camp').textContent=f0(subCamp);
+
+  document.getElementById('cx-camp-note').innerHTML=
+    'Campaña: <strong>'+dias+' días</strong> con '+nInst+' instalador(es) a '+prod+' buses/día · '+
+    nCam+' camioneta(s) · '+nSup+' supervisor(es). Instaladores se pagan a trato ($'+
+    Math.round(insPU).toLocaleString('es-CL')+'/bus), contabilizado en componentes por-bus.';
+
+  const grand=subBus+subCamp;
+  document.getElementById('cx-grand-v').textContent=f0(grand);
+  document.getElementById('cx-grand-x').textContent=F.toLocaleString('es-CL')+' buses · '+f0(grand/F)+'/bus';
+
+  window.__CAPEX_TOTAL__=grand;
+  window.__CAPEX_BUS__=grand/F;
+  window.__CAPEX_DIAS__=dias;
+  window.__CAPEX_PARTS__={kitT,cabT,insT,encT,subBus,herT,nbT,pcaT,supT,vehT,trasT,subCamp,grand,F};
+  refreshHome();
+  refreshSumario();
+  return grand;
+}
+
+// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// AMC — A Mínimo Costo
+// Deja en 0 todos los ítems OPEX excepto:
+//   tec (Técnico terreno), web (Correo + página), sw (Software/cloud base), swb (Software/cloud por bus)
+// ══════════════════════════════════════════════
+function setAMC(){
+  // Ítems a CERO (cantidad)
+  const zeroCols=['ing','ofi','cam','rm','rv','vyr'];
+  zeroCols.forEach(k=>{
+    const qEl=document.getElementById('op-'+k+'-q');
+    if(qEl){ qEl.value=0; }
+  });
+  // Ítems que SE MANTIENEN: tec, web, sw, swb — no tocar
+  recalcOpex();
+  pushToEvaluador();
+  if(typeof update==='function') update();
+  // feedback visual
+  const btn=document.getElementById('btn-amc');
+  if(btn){
+    const orig=btn.innerHTML;
+    btn.innerHTML='<span>✓</span> Aplicado';
+    btn.style.background='var(--accent)';
+    btn.style.color='#fff';
+    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background='var(--accent-dim)'; btn.style.color='var(--accent)'; },2000);
+  }
+}
+
+// OPEX
+// ══════════════════════════════════════════════
+const OPEX_ROWS=[['ing','Analista Ingeniero'],['ofi','Arriendo Oficina/Bodega'],
+['cam','Leasing camioneta'],['tec','Técnico terreno'],
+['rm','Sueldo R. Medina'],['rv','Sueldo R. Valladares'],['vyr','Sueldo V&R']];
+
+function recalcOpex(){
+  const f0=n=>'$'+Math.round(n).toLocaleString('es-CL');
+  let tot=0; const parts={};
+  OPEX_ROWS.forEach(([k,lbl])=>{
+    const t=gv('op-'+k+'-pu')*gv('op-'+k+'-q');
+    document.getElementById('op-'+k+'-t').textContent=f0(t);
+    parts[k]={lbl,t}; tot+=t;
+  });
+  // correo + web
+  const webT=gv('op-web-pu')*gv('op-web-q');
+  document.getElementById('op-web-t').textContent=f0(webT);
+  parts['web']={lbl:'Correo + web institucional',t:webT}; tot+=webT;
+  // software/cloud base (consolida licencias + cloud + IA prorrateada)
+  const swT=gv('op-sw-pu')*gv('op-sw-q');
+  document.getElementById('op-sw-t').textContent=f0(swT);
+  parts['sw']={lbl:'Software/cloud base',t:swT}; tot+=swT;
+  // software/cloud variable por bus (escala con flota)
+  const F=flotaActiva();
+  document.getElementById('op-swb-q').textContent=F.toLocaleString('es-CL');
+  const swbT=gv('op-swb-pu')*F;
+  document.getElementById('op-swb-t').textContent=f0(swbT);
+  parts['swb']={lbl:'Software/cloud por bus',t:swbT}; tot+=swbT;
+
+  document.getElementById('op-total').textContent=f0(tot);
+  window.__OPEX_MES__=tot;
+  window.__OPEX_PARTS__=parts;
+  refreshHome();
+  refreshSumario();
+  return tot;
+}
+
+// ══════════════════════════════════════════════
+// CONEXIÓN CAPEX/OPEX → EVALUADOR
+// ══════════════════════════════════════════════
+function pushToEvaluador(){
+  const cb=window.__CAPEX_BUS__, om=window.__OPEX_MES__;
+  const f0=n=>'$'+(Math.abs(n)>=1e6?(n/1e6).toFixed(2)+'M':Math.round(n).toLocaleString('es-CL'));
+  if(cb){
+    const sl=document.getElementById('sl-capexbus');
+    if(sl) sl.value=Math.min(Math.max(Math.round(cb),+sl.min),+sl.max);
+    const vc=document.getElementById('v-capexbus');
+    if(vc) vc.textContent=f0(cb)+'/bus';
+  }
+  if(om){
+    const so=document.getElementById('sl-opex');
+    if(so) so.value=Math.min(Math.max(Math.round(om),+so.min),+so.max);
+    const vo=document.getElementById('v-opex');
+    if(vo) vo.textContent=f0(om)+'/mes';
+  }
+  if(typeof update==='function') update();
+}
+
+// estima probabilidad de éxito tipo Montecarlo (rápida, ±15% sobre tarifa/opex/capex)
+function estimaProbMC(){
+  try{
+    const v=getVals();
+    if(!v||!v.plazo) return null;
+    let ok=0, N=400;
+    for(let i=0;i<N;i++){
+      const tf=v.tarifa*(0.85+Math.random()*0.30);
+      const op=v.opex*(0.85+Math.random()*0.30);
+      const cx=v.capexBus*(0.85+Math.random()*0.30);
+      const F=v.flota, plazo=v.plazo;
+      const ing=tf*40000*F, eg=op, fm=ing-eg; // tf en UF/bus/mes × valor UF
+      const capex=cx*F;
+      const tDesc=(v.tdescPct/10)/100;
+      let van=-capex;
+      for(let m=1;m<=plazo;m++) van+=fm/Math.pow(1+tDesc,m);
+      if(van>0) ok++;
+    }
+    return ok/N;
+  }catch(e){ return null; }
+}
+
+function refreshHome(){
+  const f0=n=>'$'+(Math.abs(n)>=1e6?(n/1e6).toFixed(1)+'M':Math.round(n).toLocaleString('es-CL'));
+  const ct=window.__CAPEX_TOTAL__||0, om=window.__OPEX_MES__||0;
+  const set=(id,val)=>{const e=document.getElementById(id); if(e)e.textContent=val;};
+  set('home-capex-v',f0(ct));
+  set('home-opex-v',f0(om)+'/m');
+  // VAN y prob Montecarlo en vivo (con datos de referencia del evaluador)
+  const vanEl=document.getElementById('mv-van');
+  if(vanEl && vanEl.textContent && vanEl.textContent!=='—'){
+    set('home-van-v',vanEl.textContent);
+  }
+  const p=estimaProbMC();
+  if(p!=null) set('home-mc-v',(p*100).toFixed(0)+'% éxito');
+}
+
+function refreshSumario(){
+  const f0=n=>'$'+Math.round(n).toLocaleString('es-CL');
+  const fM=n=>'$'+(Math.abs(n)>=1e6?(n/1e6).toFixed(2)+'M':Math.round(n).toLocaleString('es-CL'));
+  const P=window.__CAPEX_PARTS__, O=window.__OPEX_PARTS__;
+  if(!P) return;
+  const set=(id,v)=>{const e=document.getElementById(id); if(e)e.textContent=v;};
+  set('sum-flota',P.F.toLocaleString('es-CL')+' buses');
+  set('sum-capex',fM(P.grand));
+  set('sum-opex',fM(window.__OPEX_MES__||0));
+  set('sum-kit',f0((window.__COSTO_KIT__||0)));
+  set('sum-otros',f0(P.cabT/P.F + P.insT/P.F + P.encT/P.F)+' /bus');
+  set('sum-subbus',f0(P.subBus));
+  set('sum-camp',f0(P.subCamp));
+  set('sum-capex2',fM(P.grand));
+  set('sum-capexbus',f0(P.grand/P.F));
+  set('sum-dias',(window.__CAPEX_DIAS__||0)+' días');
+  if(O){
+    const html=Object.keys(O).map(k=>`<div class="cx-kv"><span class="kv-k">${O[k].lbl}</span><span class="kv-v">${f0(O[k].t)}</span></div>`).join('');
+    const el=document.getElementById('sum-opex-list'); if(el)el.innerHTML=html;
+  }
+  set('sum-opex2',fM(window.__OPEX_MES__||0));
+  set('sum-opexbus',f0((window.__OPEX_MES__||0)/P.F)+' /bus');
+  // indicadores del evaluador (leídos del DOM tras update)
+  const g=id=>{const e=document.getElementById(id); return e?e.textContent:'—';};
+  set('sum-van',g('mv-van')); set('sum-tir',g('mv-tir')); set('sum-payback',g('mv-payback'));
+  set('sum-ing',g('mv-ingreso')); set('sum-flujo',g('mv-flujo'));
+  const p=estimaProbMC(); set('sum-prob',p!=null?(p*100).toFixed(0)+'%':'—');
+}
+
+function recalcAll(){
+  syncFlota();
+  recalcCotiz();   // -> recalcCapex dentro
+  recalcOpex();
+  pushToEvaluador();
+  if(typeof update==='function') update();
+  refreshHome();
+  refreshSumario();
+}
+
+function cxSub(w){
+  document.getElementById('cx-form').style.display = w==='form'?'block':'none';
+  document.getElementById('cx-cot').style.display  = w==='cot'?'block':'none';
+  document.getElementById('cxst-form').classList.toggle('active',w==='form');
+  document.getElementById('cxst-cot').classList.toggle('active',w==='cot');
+  if(w==='cot') recalcCotiz();
+}
+
+// bindings
+document.getElementById('home-flota').addEventListener('input',()=>{
+  // al cambiar flota global, sincroniza la local de CAPEX
+  const loc=document.getElementById('cx-flota-local'); if(loc) loc.value=getFlota();
+  recalcAll();
+});
+document.getElementById('cx-flota-local').addEventListener('input',()=>{
+  recalcCotiz(); pushToEvaluador(); if(typeof update==='function')update();
+});
+['ck-tc','ck-iva','ck-recup','ck-cam','ck-desc','ck-emb','ck-mode','ck-desp'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{ recalcCotiz(); pushToEvaluador(); if(typeof update==='function')update(); });
+});
+['cx-cab-pu','cx-ins-pu','cx-enc-pu','cx-ninst','cx-prod','cx-inst-cam','cx-inst-sup','cx-her-pu','cx-nb-pu','cx-pca-pu','cx-sup-pu','cx-veh-pu','cx-tras-pu'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{ recalcCapex(); pushToEvaluador(); if(typeof update==='function')update(); });
+});
+['ing','ofi','cam','tec','rm','rv','vyr','web','sw'].forEach(k=>{
+  ['-pu','-q'].forEach(s=>{
+    const el=document.getElementById('op-'+k+s);
+    if(el) el.addEventListener('input',()=>{ recalcOpex(); recalcCapex(); pushToEvaluador(); if(typeof update==='function')update(); });
+  });
+});
+// software por-bus: solo P/U (la cantidad es la flota, calculada)
+document.getElementById('op-swb-pu').addEventListener('input',()=>{ recalcOpex(); pushToEvaluador(); if(typeof update==='function')update(); });
+
+window.addEventListener('load',()=>{
+  // restaura inputs guardados antes del primer cálculo
+  restoreState();
+  recalcAll();
+  renderScenarios();
+  navTo('home');
+  // segundo pase: garantiza que todos los inputs HTML estén pintados con su value
+  setTimeout(()=>{ recalcAll(); }, 100);
+});
+
+// ══════════════════════════════════════════════
+// EVALUADOR
+// ══════════════════════════════════════════════
+let activeTab='acum', chart=null;
+
+function getVals(){
+  // flota: preferir inp-flota (editable local) si existe, sino sl-flota
+  const _inpF=document.getElementById('inp-flota');
+  const _flotaVal=_inpF?Math.max(1,Math.min(2000,parseInt(_inpF.value)||1)):+document.getElementById('sl-flota').value;
+  // plazo y tarifa: preferir el input numérico (permite superar el tope de la barra)
+  const _inpP=document.getElementById('inp-plazo');
+  const _plazoVal=_inpP?Math.max(1,Math.min(120,parseInt(_inpP.value)||1)):+document.getElementById('sl-plazo').value;
+  const _inpT=document.getElementById('inp-tarifa');
+  // tarifa en UF/bus/mes (1 UF = $40.000)
+  const _tarifaVal=_inpT?Math.max(0,Math.min(50,parseFloat(_inpT.value)||0)):+document.getElementById('sl-tarifa').value;
+  const _slRamp=document.getElementById('sl-ramp');
+  return{
+    flota:_flotaVal,
+    plazo:_plazoVal,
+    tarifa:_tarifaVal,
+    dias:30,
+    ramp:_slRamp?+_slRamp.value:0,
+    opex:+document.getElementById('sl-opex').value,
+    capexBus:+document.getElementById('sl-capexbus').value,
+    tdescPct:+document.getElementById('sl-tdesc').value,
+    pcred:+document.getElementById('sl-pcred').value,
+    icredPct:+document.getElementById('sl-icred').value,
+  };
+}
+
+// ── Sincronización barra ⇄ input numérico (plazo y tarifa) ──
+function onPlazoInput(val){
+  const p=Math.max(1,Math.min(120,parseInt(val)||1));
+  const sl=document.getElementById('sl-plazo'); if(sl) sl.value=Math.min(p,+sl.max);
+  update();
+}
+function onPlazoSlider(val){
+  const inp=document.getElementById('inp-plazo'); if(inp) inp.value=+val;
+  update();
+}
+function onTarifaInput(val){
+  const t=Math.max(0,Math.min(50,parseFloat(val)||0)); // UF/bus/mes
+  const sl=document.getElementById('sl-tarifa'); if(sl) sl.value=Math.min(Math.max(t,+sl.min),+sl.max);
+  update();
+}
+function onTarifaSlider(val){
+  const inp=document.getElementById('inp-tarifa'); if(inp) inp.value=+val;
+  update();
+}
+
+function setTab(t){
+  activeTab=t;
+  ['acum','mens','van'].forEach(id=>document.getElementById('tab-'+id).classList.toggle('active',id===t));
+  update();
+}
+
+function update(){
+  const v=getVals();
+  // El control de flota del evaluador ahora es un <input>, no un <span id="v-flota">.
+  // Se actualiza de forma segura (sin romper si el elemento no existe).
+  const _vFlota=document.getElementById('v-flota');
+  if(_vFlota) _vFlota.textContent=v.flota+(v.flota<=5?' buses 🧪 piloto':' buses');
+  const _inpFlotaDisp=document.getElementById('inp-flota');
+  if(_inpFlotaDisp && document.activeElement!==_inpFlotaDisp) _inpFlotaDisp.value=v.flota;
+  // Sincroniza input numérico y barra de plazo/tarifa sin pisar lo que el usuario escribe
+  const _inpPlazo=document.getElementById('inp-plazo');
+  if(_inpPlazo && document.activeElement!==_inpPlazo) _inpPlazo.value=v.plazo;
+  const _slPlazo=document.getElementById('sl-plazo'); if(_slPlazo) _slPlazo.value=Math.min(v.plazo,+_slPlazo.max);
+  const _inpTarifa=document.getElementById('inp-tarifa');
+  if(_inpTarifa && document.activeElement!==_inpTarifa) _inpTarifa.value=v.tarifa;
+  const _slTarifa=document.getElementById('sl-tarifa'); if(_slTarifa) _slTarifa.value=Math.min(Math.max(v.tarifa,+_slTarifa.min),+_slTarifa.max);
+  const _vRamp=document.getElementById('v-ramp'); if(_vRamp) _vRamp.textContent=(v.ramp===0?'Inmediato':v.ramp+' meses');
+  document.getElementById('v-tarifa-uf').textContent='$'+Math.round(v.tarifa*40000).toLocaleString('es-CL')+' /bus/mes';
+  document.getElementById('v-opex').textContent=fmtCLP(v.opex,true);
+  document.getElementById('v-capexbus').textContent='$'+v.capexBus.toLocaleString('es-CL');
+  document.getElementById('v-tdesc').textContent=(v.tdescPct/10).toFixed(1)+'% / mes';
+  document.getElementById('v-pcred').textContent=v.pcred===0?'Sin crédito':v.pcred+' meses';
+  document.getElementById('v-icred').textContent=v.icredPct+'% / año';
+
+  const tDesc=v.tdescPct/1000;
+  const tCredMes=Math.pow(1+v.icredPct/100,1/12)-1;
+  const capex=v.capexBus*v.flota;
+  // tarifa en UF/bus/mes → ingreso CLP/mes = flota × tarifa × valor UF ($40.000)
+  const ingresoMes=v.flota*v.tarifa*40000;
+  const flujoOpMes=ingresoMes-v.opex;
+  const cuota=cuotaFrances(capex,tCredMes,v.pcred);
+  const costoCred=v.pcred>0?cuota*v.pcred-capex:0;
+  const margen=ingresoMes>0?flujoOpMes/ingresoMes:0;
+  const useCred=v.pcred>0;
+
+  // Ramp-up: fracción de flota operativa en el mes i (despliegue lineal)
+  const rampFrac=i=> v.ramp>0?Math.min(1,i/v.ramp):1;
+  const labels=['0'],flujosBase=[-capex],flujosCred=[useCred?0:-capex];
+  for(let i=1;i<=v.plazo;i++){const flujoOpI=ingresoMes*rampFrac(i)-v.opex;labels.push(String(i));flujosBase.push(flujoOpI);flujosCred.push(flujoOpI-(i<=v.pcred?cuota:0));}
+  const flujosMain=useCred?flujosCred:flujosBase;
+  const van=calcVAN(flujosMain,tDesc);
+  const tir=calcTIR(flujosMain);
+  let payback=null,cumPb=useCred?0:-capex;
+  for(let i=1;i<=v.plazo;i++){cumPb+=flujosMain[i];if(cumPb>=0&&payback===null){payback=i;break;}}
+
+  const acumBase=[],acumCred=[];let cb=0,cc=0;
+  for(let i=0;i<flujosBase.length;i++){cb+=flujosBase[i];acumBase.push(cb);cc+=flujosCred[i];acumCred.push(cc);}
+  const vanIncr=[];let va=flujosMain[0];vanIncr.push(va);
+  for(let i=1;i<flujosMain.length;i++){va+=flujosMain[i]/Math.pow(1+tDesc,i);vanIncr.push(va);}
+
+  // Metrics
+  document.getElementById('mv-van').textContent=fmtCLP(van,true);
+  document.getElementById('mc-van').className='metric-card '+(van>0?'is-pos':van<0?'is-neg':'');
+  if(tir!==null){
+    const tA=(Math.pow(1+tir,12)-1)*100;
+    document.getElementById('mv-tir').textContent=tA.toFixed(1)+'%/año';
+    document.getElementById('ms-tir').textContent=(tir*100).toFixed(2)+'%/mes';
+    document.getElementById('mc-tir').className='metric-card '+(tir>tDesc?'is-pos':tir>0?'is-warn':'is-neg');
+  }else{document.getElementById('mv-tir').textContent='N/A';document.getElementById('mc-tir').className='metric-card is-neg';}
+  if(payback){document.getElementById('mv-payback').textContent=payback+' meses';document.getElementById('mc-payback').className='metric-card '+(payback<=v.plazo/2?'is-pos':payback<=v.plazo?'is-warn':'is-neg');}
+  else{document.getElementById('mv-payback').textContent='>'+v.plazo+'m';document.getElementById('mc-payback').className='metric-card is-neg';}
+  document.getElementById('mv-flujo').textContent=fmtCLP(flujoOpMes,true);
+  document.getElementById('mc-flujo').className='metric-card '+(flujoOpMes>=0?'is-pos':'is-neg');
+  document.getElementById('mv-ingreso').textContent=fmtCLP(ingresoMes,true);
+  document.getElementById('ms-ingreso').textContent=v.flota+'b × '+v.tarifa.toLocaleString('es-CL',{maximumFractionDigits:3})+' UF/mes × $40.000';
+  document.getElementById('mv-capex').textContent=fmtCLP(capex,true);
+  document.getElementById('mv-cuota').textContent=useCred?fmtCLP(cuota,true):'—';
+  document.getElementById('ms-cuota').textContent=useCred?'Total: '+fmtCLP(costoCred,true):'Sin financiamiento';
+  document.getElementById('mc-cuota').className='metric-card '+(useCred?'is-warn':'');
+  document.getElementById('mv-margen').textContent=(margen*100).toFixed(1)+'%';
+  document.getElementById('mc-margen').className='metric-card '+(margen>0.3?'is-pos':margen>0?'is-warn':'is-neg');
+
+  // Chart
+  const G='#1F9D6B',O='#F39200',R='#C0222E',B='#2B7FD6';
+  let ds=[],leg='';
+  if(activeTab==='acum'){
+    ds.push({data:acumBase,type:'line',borderColor:G,backgroundColor:'rgba(31,157,107,0.06)',pointBackgroundColor:acumBase.map(v=>v>=0?G:R),pointRadius:3,tension:0.35,fill:true,order:2});
+    if(useCred)ds.push({data:acumCred,type:'line',borderColor:O,backgroundColor:'rgba(243,146,0,0.05)',borderDash:[5,3],pointBackgroundColor:O,pointRadius:3,tension:0.35,fill:true,order:1});
+    leg=`<span class="leg-item"><span class="leg-dot" style="background:${G}"></span>Sin crédito</span>`+(useCred?`<span class="leg-item"><span class="leg-dot dashed"></span>Con crédito</span>`:'');
+  }else if(activeTab==='mens'){
+    ds.push({data:flujosMain,type:'bar',backgroundColor:flujosMain.map(f=>f>=0?'rgba(31,157,107,0.55)':'rgba(192,34,46,0.5)'),borderColor:flujosMain.map(f=>f>=0?G:R),borderWidth:1});
+    leg=`<span class="leg-item"><span class="leg-dot" style="background:${G}"></span>Positivo</span><span class="leg-item"><span class="leg-dot" style="background:${R}"></span>Negativo</span>`;
+  }else{
+    ds.push({data:vanIncr,type:'line',borderColor:B,backgroundColor:'rgba(43,127,214,0.06)',pointBackgroundColor:vanIncr.map(v=>v>=0?B:R),pointRadius:3,tension:0.35,fill:true});
+    leg=`<span class="leg-item"><span class="leg-dot" style="background:${B}"></span>VAN acumulado</span>`;
+  }
+  document.getElementById('chart-legend').innerHTML=leg;
+  const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(17,17,24,0.95)',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,titleColor:'#8a8799',bodyColor:'#f0ede8',titleFont:{size:11},bodyFont:{family:"'DM Mono',monospace",size:12},callbacks:{label:c=>' '+fmtCLP(c.parsed.y,true)}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:13,color:'#55536a',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(255,255,255,0.06)'}},y:{ticks:{color:'#55536a',font:{size:11,family:"'DM Mono',monospace"},callback:v=>fmtCLP(v,true)},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(255,255,255,0.06)'}}}};
+  if(chart){chart.data.labels=labels;chart.data.datasets=ds;chart.options=opts;chart.update('none');}
+  else chart=new Chart(document.getElementById('chart-main'),{type:activeTab==='mens'?'bar':'line',data:{labels,datasets:ds},options:opts});
+
+  // Tabla
+  let rows='',cum=0;
+  const mx=Math.min(v.plazo+1,25);
+  for(let i=0;i<mx;i++){
+    const ing=i===0?0:ingresoMes*rampFrac(i);
+    const eg=i===0?(useCred?0:capex)+v.opex:v.opex+(i<=v.pcred?cuota:0);
+    const fl=flujosMain[i];cum+=fl;const pb=payback===i;
+    rows+=`<tr${pb?' class="payback-row"':''}><td>${i}</td><td>${i===0?'—':fmtCLP(ing,true)}</td><td class="td-neg">${fmtCLP(-eg,true)}</td><td class="${fl>=0?'td-pos':'td-neg'}">${fmtCLP(fl,true)}</td><td class="${cum>=0?'td-pos':'td-neg'}">${fmtCLP(cum,true)}</td></tr>`;
+  }
+  if(v.plazo+1>mx)rows+=`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:10px">... ${v.plazo+1-mx} meses más</td></tr>`;
+  document.getElementById('tabla-flujos').innerHTML=rows;
+
+  // Diagnóstico
+  let cls='viable',ic='✓',ti='Proyecto viable',desc='';
+  if(van<0||flujoOpMes<0){cls='inviable';ic='✗';ti='Proyecto no viable';}
+  else if(van<capex*0.2||(tir!==null&&tir<tDesc)){cls='marginal';ic='△';ti='Rentabilidad marginal';}
+  if(cls==='viable')desc=`VAN positivo de ${fmtCLP(van,true)}. Inversión recuperada${payback?' en '+payback+' meses':' dentro del plazo'}. TIR${tir?(' '+((Math.pow(1+tir,12)-1)*100).toFixed(1)+'%/año'):'no calculable'}.`;
+  else if(cls==='marginal')desc='El proyecto genera flujos positivos pero el retorno es ajustado. Revisar tarifa o reducir OPEX.';
+  else desc=`Flujo operacional ${flujoOpMes<0?'negativo':'no cubre el CAPEX'}. Ajustar tarifa, flota o plazo.`;
+  document.getElementById('scenario-box').innerHTML=`<div class="scenario-result ${cls}"><div class="scenario-icon">${ic}</div><div class="scenario-text"><h3>${ti}</h3><p>${desc}</p></div></div>`;
+
+  const kpis=[['CAPEX / bus',fmtCLP(v.capexBus,false),'var(--text)'],['Ingreso / bus / mes',fmtCLP(v.tarifa*40000,false),'var(--blue)'],['OPEX / bus / mes',fmtCLP(v.opex/v.flota,false),'var(--warn)'],['Margen bruto',(margen*100).toFixed(1)+'%',margen>0?'var(--accent)':'var(--red)'],['Cuota / ingreso',useCred?((cuota/ingresoMes)*100).toFixed(1)+'%':'N/A','var(--gold)'],['VAN / CAPEX',(van/capex*100).toFixed(1)+'%',van>0?'var(--accent)':'var(--red)']];
+  document.getElementById('kpi-row').innerHTML=kpis.map(([n,val,col])=>`<div class="kpi-item"><span class="kpi-name">${n}</span><span class="kpi-val" style="color:${col}">${val}</span></div>`).join('');
+}
+
+document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',update));
+// El primer update() se aísla: si fallara por un elemento ausente, el resto del
+// script (Montecarlo y Escenario Objetivo) debe seguir inicializándose igual.
+try{ update(); }catch(e){ console.warn('update() inicial falló:',e); }
+
+// ══════════════════════════════════════════════
+// MONTECARLO
+// ══════════════════════════════════════════════
+let mcChart=null;
+
+function updateMCFixed(){
+  const v=getVals();
+  document.getElementById('mc-fixed-params').innerHTML=[
+    ['Plazo contrato',v.plazo+' meses'],
+    ['Tasa descuento',(v.tdescPct/10).toFixed(1)+'%/mes'],
+    ['Plazo crédito',v.pcred===0?'Sin crédito':v.pcred+' meses'],
+    ['Interés crédito',v.icredPct+'%/año'],
+  ].map(([k,val])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>${k}</span><span style="color:var(--text)">${val}</span></div>`).join('');
+
+  // Auto-sync flota: mínimo = evaluador −15%, máximo = valor del evaluador
+  const fEval=+document.getElementById('sl-flota').value||3;
+  if(!window.__MC_FLOTA_TOUCHED__){
+    document.getElementById('mc-flota-min').value=Math.max(1,Math.round(fEval*0.85));
+    document.getElementById('mc-flota-max').value=fEval;
+  }
+
+  // Sugerir rangos OPEX/CAPEX con ±15% sobre los valores calculados (editable)
+  const om=window.__OPEX_MES__, cb=window.__CAPEX_BUS__;
+  if(om && !window.__MC_OPEX_TOUCHED__){
+    document.getElementById('mc-opex-min').value=Math.round(om*0.85/100000)*100000;
+    document.getElementById('mc-opex-max').value=Math.round(om*1.15/100000)*100000;
+  }
+  if(cb && !window.__MC_CAPEX_TOUCHED__){
+    document.getElementById('mc-capex-min').value=Math.round(cb*0.85/10000)*10000;
+    document.getElementById('mc-capex-max').value=Math.round(cb*1.15/10000)*10000;
+  }
+  // Tasa crédito: ±10pp del evaluador
+  const ic=v.icredPct;
+  if(!window.__MC_ICRED_TOUCHED__){
+    document.getElementById('mc-icred-min').value=Math.max(0,ic-10);
+    document.getElementById('mc-icred-max').value=Math.min(100,ic+10);
+  }
+}
+
+function randNormal(mean,std){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return mean+std*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function randUniform(min,max){return min+Math.random()*(max-min);}
+function clamp(val,min,max){return Math.min(Math.max(val,min),max);}
+
+function calcVANsim(flota,tarifa,opex,dias,capexBus,plazo,tDesc,pcred,icredPct){
+  const tCred=Math.pow(1+icredPct/100,1/12)-1;
+  const capex=capexBus*flota;
+  // tarifa en UF/bus/mes → ingreso CLP/mes = flota × tarifa × $40.000 (param 'dias' ya no se usa)
+  const ingresoMes=flota*tarifa*40000;
+  const flujoOp=ingresoMes-opex;
+  const cuota=cuotaFrances(capex,tCred,pcred);
+  const useCred=pcred>0;
+  const flujos=[useCred?0:-capex];
+  for(let i=1;i<=plazo;i++)flujos.push(flujoOp-(i<=pcred?cuota:0));
+  return calcVAN(flujos,tDesc);
+}
+
+function runMontecarlo(){
+  const N=10000;
+  const v=getVals();
+  const btn=document.getElementById('mc-run-btn');
+  const icon=document.getElementById('mc-btn-icon');
+  const txt=document.getElementById('mc-btn-text');
+  btn.disabled=true;
+  icon.innerHTML='<span class="mc-spinner"></span>';
+  txt.textContent='Simulando '+N.toLocaleString()+' escenarios...';
+
+  setTimeout(()=>{
+    const flotaMin=+document.getElementById('mc-flota-min').value;
+    const flotaMax=+document.getElementById('mc-flota-max').value;
+    const tarifaMin=+document.getElementById('mc-tarifa-min').value;
+    const tarifaMax=+document.getElementById('mc-tarifa-max').value;
+    const opexMin=+document.getElementById('mc-opex-min').value;
+    const opexMax=+document.getElementById('mc-opex-max').value;
+    const capexMin=+document.getElementById('mc-capex-min').value;
+    const capexMax=+document.getElementById('mc-capex-max').value;
+    const icredMin=+document.getElementById('mc-icred-min').value;
+    const icredMax=+document.getElementById('mc-icred-max').value;
+    // OPEX imprevistos: % aleatorio (uniforme) del OPEX del proyecto, sumado como costo extra
+    const contMin=(+document.getElementById('mc-cont-min').value||0)/100;
+    const contMax=(+document.getElementById('mc-cont-max').value||0)/100;
+    const opexBase=v.opex; // OPEX del proyecto (variables del evaluador)
+
+    const tMed=(tarifaMin+tarifaMax)/2, tStd=(tarifaMax-tarifaMin)/4;
+    const oMed=(opexMin+opexMax)/2, oStd=(opexMax-opexMin)/4;
+    const cMed=(capexMin+capexMax)/2, cStd=(capexMax-capexMin)/4;
+    const tDesc=v.tdescPct/1000;
+
+    const vans=[];
+    for(let i=0;i<N;i++){
+      const flota=Math.round(clamp(randUniform(flotaMin,flotaMax),flotaMin,flotaMax));
+      const tarifa=clamp(randNormal(tMed,tStd),tarifaMin,tarifaMax);
+      const opex=clamp(randNormal(oMed,oStd),opexMin,opexMax);
+      const contingencia=opexBase*randUniform(contMin,contMax); // imprevistos sobre el OPEX del proyecto
+      const opexTotal=opex+contingencia;
+      const capexBus=clamp(randNormal(cMed,cStd),capexMin,capexMax);
+      const icredSim=clamp(randUniform(icredMin,icredMax),0,100);
+      vans.push(calcVANsim(flota,tarifa,opexTotal,30,capexBus,v.plazo,tDesc,v.pcred,icredSim));
+    }
+
+    vans.sort((a,b)=>a-b);
+    const mean=vans.reduce((s,x)=>s+x,0)/N;
+    const std=Math.sqrt(vans.reduce((s,x)=>s+Math.pow(x-mean,2),0)/(N-1));
+    const med=N%2===0?(vans[N/2-1]+vans[N/2])/2:vans[Math.floor(N/2)];
+    const minV=vans[0],maxV=vans[N-1];
+
+    const nPos=vans.filter(x=>x>0).length;
+    const threshold=Math.abs(mean)*0.05;
+    const nMarg=vans.filter(x=>x<=0&&x>-threshold).length;
+    const nNeg=N-nPos-nMarg;
+    const pPos=(nPos/N*100).toFixed(1);
+    const pMarg=(nMarg/N*100).toFixed(1);
+    const pNeg=(nNeg/N*100).toFixed(1);
+
+    // Métricas
+    document.getElementById('mc-van-mean').textContent=fmtCLP(mean,true);
+    document.getElementById('mc-van-mean').style.color=mean>0?'var(--accent)':'var(--red)';
+    document.getElementById('mc-van-med').textContent=fmtCLP(med,true);
+    document.getElementById('mc-van-med').style.color=med>0?'var(--accent)':'var(--red)';
+    document.getElementById('mc-van-std').textContent=fmtCLP(std,true);
+    document.getElementById('mc-van-min').textContent=fmtCLP(minV,true);
+    document.getElementById('mc-van-max').textContent=fmtCLP(maxV,true);
+    document.getElementById('mc-van-rango').textContent=fmtCLP(maxV-minV,true);
+
+    // Círculo de probabilidad
+    const deg=parseFloat(pPos)/100*360;
+    const col=parseFloat(pPos)>=70?'var(--accent)':parseFloat(pPos)>=40?'var(--gold)':'var(--red)';
+    document.getElementById('mc-prob-circle').style.background=`conic-gradient(${col} 0deg,${col} ${deg}deg,var(--bg4) ${deg}deg)`;
+    document.getElementById('mc-prob-pct').textContent=pPos+'%';
+    document.getElementById('mc-prob-pct').style.color=col;
+
+    let descHTML='';
+    if(parseFloat(pPos)>=80)descHTML=`<strong>${pPos}%</strong> de los 10.000 escenarios tienen VAN positivo. El proyecto es <strong>robusto ante la incertidumbre</strong>. Incluso en condiciones adversas tiende a ser rentable.`;
+    else if(parseFloat(pPos)>=50)descHTML=`<strong>${pPos}%</strong> de los escenarios son rentables. Viable en la mayoría de casos con <strong>riesgo moderado</strong>. Se recomienda asegurar la tarifa mínima antes de comprometer el CAPEX.`;
+    else descHTML=`Solo <strong>${pPos}%</strong> de los escenarios resultan rentables. El proyecto es <strong>altamente sensible</strong> a las variables. Revisar el modelo de precios o reducir la inversión inicial.`;
+    document.getElementById('mc-prob-desc').innerHTML=descHTML;
+
+    document.getElementById('mc-bar-pos').style.width=pPos+'%';
+    document.getElementById('mc-bar-pos-val').textContent=pPos+'% ('+nPos.toLocaleString()+' esc.)';
+    document.getElementById('mc-bar-marg').style.width=pMarg+'%';
+    document.getElementById('mc-bar-marg-val').textContent=pMarg+'% ('+nMarg.toLocaleString()+' esc.)';
+    document.getElementById('mc-bar-neg').style.width=pNeg+'%';
+    document.getElementById('mc-bar-neg-val').textContent=pNeg+'% ('+nNeg.toLocaleString()+' esc.)';
+
+    // Percentiles
+    const pcts=[5,25,50,75,95];
+    document.getElementById('mc-percentiles').innerHTML=pcts.map((p,i)=>{
+      const val=vans[Math.floor(p/100*N)];
+      return`<div class="mc-pct"><div class="mc-pct-label">P${p}</div><div class="mc-pct-val" style="color:${val>0?'var(--accent)':'var(--red)'}">${fmtCLP(val,true)}</div></div>`;
+    }).join('');
+
+    // Histograma
+    const nBins=40;
+    const bW=(maxV-minV)/nBins;
+    const bins=Array(nBins).fill(0);
+    const edges=Array.from({length:nBins},(_,i)=>minV+i*bW);
+    vans.forEach(x=>{const b=Math.min(Math.floor((x-minV)/bW),nBins-1);bins[b]++;});
+
+    if(mcChart)mcChart.destroy();
+    mcChart=new Chart(document.getElementById('mc-hist-chart'),{
+      type:'bar',
+      data:{
+        labels:edges.map(e=>fmtCLP(e,true)),
+        datasets:[{data:bins,backgroundColor:edges.map(e=>e>=0?'rgba(31,157,107,0.6)':'rgba(192,34,46,0.55)'),borderWidth:0,borderRadius:2}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{backgroundColor:'rgba(17,17,24,0.95)',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,titleColor:'#8a8799',bodyColor:'#f0ede8',
+            callbacks:{title:c=>'VAN: '+c[0].label,label:c=>'Frecuencia: '+c.parsed.y+' esc. ('+((c.parsed.y/N)*100).toFixed(1)+'%)'}
+          }
+        },
+        scales:{
+          x:{ticks:{color:'#55536a',font:{size:9},maxTicksLimit:8,autoSkip:true},grid:{display:false},border:{color:'rgba(255,255,255,0.06)'}},
+          y:{ticks:{color:'#55536a',font:{size:9}},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(255,255,255,0.06)'}}
+        },
+        categoryPercentage:1.0,barPercentage:1.0
+      }
+    });
+
+    document.getElementById('mc-dist-sub').textContent=`Promedio: ${fmtCLP(mean,true)} · σ: ${fmtCLP(std,true)}`;
+    document.getElementById('mc-empty-state').style.display='none';
+    document.getElementById('mc-results-content').style.display='flex';
+
+    btn.disabled=false;
+    icon.textContent='🎲';
+    txt.textContent='Simular nuevamente';
+  },50);
+}
+
+
+// ══════════════════════════════════════════════
+// OBJETIVO v2
+// ══════════════════════════════════════════════
+let objMode = 'plazo';  // 'flota' | 'plazo' | 'tarifa'
+let objChart = null;
+
+function setObjMode(mode) {
+  objMode = mode;
+  ['flota','plazo','tarifa'].forEach(m=>{
+    document.getElementById('mode-'+m).classList.toggle('active', m===mode);
+    const fld=document.getElementById('fld-'+m);
+    const inp=document.getElementById('obj-in-'+m);
+    const tag=document.getElementById('tag-'+m);
+    if(m===mode){
+      fld.classList.add('solving'); inp.disabled=true; tag.textContent='resuelve';
+    } else {
+      fld.classList.remove('solving'); inp.disabled=false; tag.textContent='fijo';
+    }
+  });
+  updateObjetivo();
+}
+
+function calcVANobj(flota, plazo, tarifa, v) {
+  const tDesc = v.tdescPct / 1000;
+  const tCredMes = Math.pow(1 + v.icredPct / 100, 1 / 12) - 1;
+  const capex = v.capexBus * flota;
+  // tarifa en UF/bus/mes → ingreso CLP/mes = flota × tarifa × $40.000
+  const ingresoMes = flota * tarifa * 40000;
+  const flujoOp = ingresoMes - v.opex;
+  const cuota = cuotaFrances(capex, tCredMes, v.pcred);
+  const useCred = v.pcred > 0;
+  const flujos = [useCred ? 0 : -capex];
+  for (let i = 1; i <= plazo; i++) flujos.push(flujoOp - (i <= v.pcred ? cuota : 0));
+  return calcVAN(flujos, tDesc);
+}
+
+// Solver: dado flota+tarifa, encuentra plazo mínimo (meses enteros, max 120)
+function solvePlazo(flota, tarifa, vanObj, v) {
+  for (let p = 1; p <= 120; p++) {
+    if (calcVANobj(flota, p, tarifa, v) >= vanObj) return p;
+  }
+  return null;
+}
+
+// Solver: dado plazo+tarifa, encuentra flota mínima (entera)
+function solveFlota(plazo, tarifa, vanObj, v) {
+  if (calcVANobj(1, plazo, tarifa, v) >= vanObj) return 1;
+  let lo = 1, hi = 5000;
+  if (calcVANobj(hi, plazo, tarifa, v) < vanObj) return null;
+  while (hi - lo > 1) {
+    const mid = Math.floor((lo + hi) / 2);
+    calcVANobj(mid, plazo, tarifa, v) >= vanObj ? hi = mid : lo = mid;
+  }
+  return hi;
+}
+
+// Solver: dado flota+plazo, encuentra tarifa mínima (UF/bus/mes)
+function solveTarifa(flota, plazo, vanObj, v) {
+  // VAN crece monotónicamente con la tarifa -> bisección
+  let lo = 0, hi = 200; // UF/bus/mes
+  if (calcVANobj(flota, plazo, hi, v) < vanObj) return null; // ni con tarifa altísima
+  if (calcVANobj(flota, plazo, lo, v) >= vanObj) return 0;     // ya factible con tarifa 0
+  for (let it = 0; it < 60; it++) {
+    const mid = (lo + hi) / 2;
+    if (calcVANobj(flota, plazo, mid, v) >= vanObj) hi = mid; else lo = mid;
+  }
+  return Math.ceil(hi / 0.05) * 0.05; // redondea a múltiplo de 0,05 UF hacia arriba (conservador)
+}
+
+function updateObjetivo() {
+  const v = getVals();
+  v.dias = 30;
+
+  // Lee los 3 campos numéricos
+  let inFlota = parseInt(document.getElementById('obj-in-flota').value) || 1;
+  let inPlazo = parseInt(document.getElementById('obj-in-plazo').value) || 1;
+  let inTarifa = parseFloat(document.getElementById('obj-in-tarifa').value) || 0;
+  inFlota = Math.max(1, inFlota);
+  inPlazo = Math.max(1, inPlazo);
+  inTarifa = Math.max(0, inTarifa);
+
+  const vanObj = +document.getElementById('sl-van-objetivo').value * 1e6;
+  document.getElementById('obj-van-disp').textContent = '$' + document.getElementById('sl-van-objetivo').value + 'M';
+
+  // equivalente en pesos de la tarifa ingresada (la tarifa ya está en UF/bus/mes)
+  const ufDisp = document.getElementById('obj-tarifa-uf-display');
+  if (ufDisp) ufDisp.textContent = inTarifa.toFixed(3) + ' UF/bus/mes · ≈ $' + Math.round(inTarifa*40000).toLocaleString('es-CL') + '/bus/mes (1 UF = $40.000)';
+
+  let solFlota = inFlota, solPlazo = inPlazo, solTarifa = inTarifa;
+  let okSolve = true;
+  const lbl = document.getElementById('obj-solve-label');
+  const val = document.getElementById('obj-solve-val');
+  const sub = document.getElementById('obj-solve-sub');
+
+  if (objMode === 'flota') {
+    lbl.textContent = 'Flota mínima requerida';
+    const r = solveFlota(inPlazo, inTarifa, vanObj, v);
+    if (r !== null) {
+      solFlota = r;
+      val.textContent = r.toLocaleString('es-CL') + ' buses';
+      sub.textContent = `Con ${inPlazo} meses y tarifa ${inTarifa.toLocaleString('es-CL',{maximumFractionDigits:3})} UF/bus/mes`;
+      document.getElementById('obj-in-flota').value = r;
+    } else { okSolve=false; val.textContent='>5.000 buses'; sub.textContent='No factible con este plazo y tarifa'; }
+  } else if (objMode === 'plazo') {
+    lbl.textContent = 'Plazo mínimo requerido';
+    const r = solvePlazo(inFlota, inTarifa, vanObj, v);
+    if (r !== null) {
+      solPlazo = r;
+      val.textContent = r + ' meses';
+      sub.textContent = `Con ${inFlota.toLocaleString('es-CL')} buses y tarifa ${inTarifa.toLocaleString('es-CL',{maximumFractionDigits:3})} UF/bus/mes`;
+      document.getElementById('obj-in-plazo').value = r;
+    } else { okSolve=false; val.textContent='>120 meses'; sub.textContent='No factible con esta flota y tarifa'; }
+  } else { // tarifa
+    lbl.textContent = 'Tarifa mínima requerida';
+    const r = solveTarifa(inFlota, inPlazo, vanObj, v);
+    if (r !== null) {
+      solTarifa = r;
+      val.textContent = r.toLocaleString('es-CL',{maximumFractionDigits:3}) + ' UF/bus/mes';
+      sub.textContent = `Con ${inFlota.toLocaleString('es-CL')} buses y ${inPlazo} meses · ≈ $${Math.round(r*40000).toLocaleString('es-CL')}/bus/mes`;
+      document.getElementById('obj-in-tarifa').value = r;
+    } else { okSolve=false; val.textContent='No alcanzable'; sub.textContent='Ni con tarifa muy alta se logra el VAN'; }
+  }
+
+  // Métricas del punto solución
+  document.getElementById('obj-rc-tarifa').textContent = solTarifa.toLocaleString('es-CL',{maximumFractionDigits:3}) + ' UF';
+  if (okSolve) {
+    const vanSol = calcVANobj(solFlota, solPlazo, solTarifa, v);
+    const ingresoSol = solFlota * solTarifa * 40000;
+    const margenSol = ingresoSol>0 ? (ingresoSol - v.opex) / ingresoSol : 0;
+    document.getElementById('obj-rc-van').textContent = fmtCLP(vanSol, true);
+    document.getElementById('obj-rc-van').style.color = vanSol >= vanObj ? 'var(--accent)' : 'var(--red)';
+    document.getElementById('obj-rc-ingreso').textContent = fmtCLP(ingresoSol, true);
+    document.getElementById('obj-rc-margen').textContent = (margenSol * 100).toFixed(1) + '%';
+
+    const cls = vanSol < vanObj * 0.95 ? 'no' : (vanSol < vanObj ? 'warn' : 'ok');
+    const icon = cls==='ok' ? '✓' : (cls==='warn' ? '△' : '✗');
+    let msg;
+    if (cls === 'ok') msg = `Con <strong>${solFlota.toLocaleString('es-CL')} buses × ${solPlazo} meses × ${solTarifa.toLocaleString('es-CL',{maximumFractionDigits:3})} UF/bus/mes</strong> alcanzas un VAN de <strong>${fmtCLP(vanSol, true)}</strong>, cumpliendo el objetivo.`;
+    else if (cls === 'warn') msg = `Muy cerca: VAN de ${fmtCLP(vanSol, true)} vs objetivo ${fmtCLP(vanObj, true)}.`;
+    else msg = `No factible con esta configuración. Ajusta las otras variables.`;
+    document.getElementById('obj-status-box').innerHTML = `<div class="obj-status ${cls}"><span class="obj-status-icon">${icon}</span><span>${msg}</span></div>`;
+    document.getElementById('obj-strip-punto').textContent = solFlota.toLocaleString('es-CL') + 'b × ' + solPlazo + 'm';
+  } else {
+    document.getElementById('obj-rc-van').textContent = 'N/A';
+    document.getElementById('obj-rc-ingreso').textContent = 'N/A';
+    document.getElementById('obj-rc-margen').textContent = 'N/A';
+    document.getElementById('obj-status-box').innerHTML = `<div class="obj-status no"><span class="obj-status-icon">✗</span><span>No factible. Ajusta las variables fijas o el VAN objetivo.</span></div>`;
+    document.getElementById('obj-strip-punto').textContent = 'N/A';
+  }
+
+  // override para el gráfico (usa la tarifa solución)
+  v.tarifa = solTarifa;
+  buildObjChart(vanObj, v, solFlota, solPlazo);
+}
+
+function buildObjChart(vanObj, v, solFlota, solPlazo) {
+  // Generar curva de frontera: para cada flota, el plazo mínimo requerido
+  const flotaRange = [];
+  for (let f = 1; f <= 2000; f += (f < 20 ? 1 : f < 100 ? 5 : f < 500 ? 25 : 100)) flotaRange.push(f);
+  
+  // Puntos de la frontera (flota, plazoMin)
+  const frontierPoints = [];
+  flotaRange.forEach(f => {
+    const p = solvePlazo(f, v.tarifa, vanObj, v);
+    if (p !== null && p <= 72) frontierPoints.push({x: p, y: f});
+  });
+
+  // Zona factible: puntos sobre la frontera (plazo >= plazoMin)
+  const feasibleZone = [];   // puntos SOBRE la curva (buenos)
+  const infeasibleZone = []; // puntos BAJO la curva (malos)
+
+  // Scatter grid para background
+  const gridPoints = [];
+  const flotaGrid = [1, 3, 5, 10, 20, 50, 100, 200, 500, 1000, 1500, 2000];
+  const plazoGrid = [1, 6, 12, 18, 24, 30, 36, 48, 60, 72];
+  flotaGrid.forEach(f => {
+    plazoGrid.forEach(p => {
+      const van = calcVANobj(f, p, v.tarifa, v);
+      const isFeasible = van >= vanObj;
+      gridPoints.push({
+        x: p, y: f,
+        van: van,
+        feasible: isFeasible
+      });
+    });
+  });
+
+  const feasPts = gridPoints.filter(d => d.feasible);
+  const infPts = gridPoints.filter(d => !d.feasible);
+
+  const datasets = [
+    // Zona factible (verde)
+    {
+      label: 'Supera objetivo',
+      data: feasPts.map(d => ({x: d.x, y: d.y})),
+      backgroundColor: 'rgba(127,255,178,0.35)',
+      borderColor: 'rgba(127,255,178,0.7)',
+      borderWidth: 1,
+      pointRadius: 7,
+      pointHoverRadius: 9,
+      type: 'scatter',
+      order: 3
+    },
+    // Zona infactible (rojo)
+    {
+      label: 'No alcanza',
+      data: infPts.map(d => ({x: d.x, y: d.y})),
+      backgroundColor: 'rgba(255,94,94,0.25)',
+      borderColor: 'rgba(255,94,94,0.5)',
+      borderWidth: 1,
+      pointRadius: 6,
+      pointHoverRadius: 8,
+      type: 'scatter',
+      order: 3
+    },
+    // Curva frontera
+    {
+      label: 'Frontera exacta',
+      data: frontierPoints,
+      borderColor: '#ffd166',
+      backgroundColor: 'rgba(255,209,102,0.1)',
+      borderWidth: 2.5,
+      pointRadius: 3,
+      pointBackgroundColor: '#ffd166',
+      tension: 0.4,
+      type: 'line',
+      fill: false,
+      order: 2
+    },
+    // Punto solver
+    ...(solFlota !== null && solPlazo !== null ? [{
+      label: 'Solución solver',
+      data: [{x: solPlazo, y: solFlota}],
+      backgroundColor: 'var(--purple, #c084fc)',
+      borderColor: '#fff',
+      borderWidth: 2,
+      pointRadius: 10,
+      pointHoverRadius: 12,
+      type: 'scatter',
+      order: 1
+    }] : [])
+  ];
+
+  // Stats
+  const minFeasFlota = feasPts.length > 0 ? Math.min(...feasPts.map(d => d.y)) : null;
+  const minFeasPlazo = feasPts.length > 0 ? Math.min(...feasPts.map(d => d.x)) : null;
+  const pct = Math.round(feasPts.length / gridPoints.length * 100);
+  document.getElementById('obj-strip-factibles').textContent = feasPts.length + '/' + gridPoints.length + ' (' + pct + '%)';
+  document.getElementById('obj-strip-flotamin').textContent = minFeasFlota !== null ? minFeasFlota + ' buses' : 'N/A';
+  document.getElementById('obj-strip-plazomin').textContent = minFeasPlazo !== null ? minFeasPlazo + ' meses' : 'N/A';
+  document.getElementById('obj-chart-sub').textContent = `Tarifa: ${v.tarifa.toLocaleString('es-CL',{maximumFractionDigits:3})} UF/bus/mes · Objetivo: $${document.getElementById('sl-van-objetivo').value}M · OPEX: ${fmtCLP(v.opex, true)}/mes`;
+
+  const opts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(17,17,24,0.95)',
+        borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1,
+        titleColor: '#8a8799', bodyColor: '#f0ede8',
+        titleFont: {size: 11}, bodyFont: {family: "'DM Mono',monospace", size: 11},
+        callbacks: {
+          title: ctx => {
+            const d = ctx[0].dataset.label;
+            return d;
+          },
+          label: ctx => {
+            const p = ctx.parsed;
+            const van = calcVANobj(p.y, p.x, v.tarifa, v);
+            return [`Flota: ${p.y} buses`, `Plazo: ${p.x} meses`, `VAN: ${fmtCLP(van, true)}`];
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        title: {display: true, text: 'Plazo del contrato (meses)', color: '#8a8799', font: {size: 11}},
+        min: 0, max: 75,
+        ticks: {color: '#55536a', font: {size: 11}, stepSize: 6},
+        grid: {color: 'rgba(255,255,255,0.04)'},
+        border: {color: 'rgba(255,255,255,0.06)'}
+      },
+      y: {
+        type: 'linear',
+        title: {display: true, text: 'Flota (buses)', color: '#8a8799', font: {size: 11}},
+        min: 0, max: 2100,
+        ticks: {color: '#55536a', font: {size: 11}},
+        grid: {color: 'rgba(255,255,255,0.04)'},
+        border: {color: 'rgba(255,255,255,0.06)'}
+      }
+    }
+  };
+
+  if (objChart) { objChart.destroy(); objChart = null; }
+  objChart = new Chart(document.getElementById('obj-chart'), {
+    type: 'scatter',
+    data: {datasets},
+    options: opts
+  });
+}
+
+// Bind objetivo: slider VAN + 3 campos numéricos del solver
+document.getElementById('sl-van-objetivo')?.addEventListener('input',updateObjetivo);
+['obj-in-flota','obj-in-plazo','obj-in-tarifa'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input',updateObjetivo);
+});
+// Estado inicial del solver (modo 'plazo' por defecto: resuelve plazo)
+setObjMode('plazo');
+
+// ══════════════════════════════════════════════
+// PERSISTENCIA (localStorage) — conserva inputs al recargar
+// ══════════════════════════════════════════════
+const LS_STATE='fluxus_eval_state_v3'; // v3: tarifa en UF/mes (antes CLP/día)
+const LS_SCEN='fluxus_eval_scenarios_v3';
+function collectInputs(){
+  const o={};
+  document.querySelectorAll('input[id]').forEach(el=>{ o[el.id]=el.value; });
+  return o;
+}
+function applyInputs(o){
+  if(!o) return;
+  Object.keys(o).forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && el.tagName==='INPUT') el.value=o[id];
+  });
+}
+let _persistTO=null;
+function persistState(){
+  try{
+    clearTimeout(_persistTO);
+    _persistTO=setTimeout(()=>{ try{ localStorage.setItem(LS_STATE,JSON.stringify(collectInputs())); }catch(e){} },300);
+  }catch(e){}
+}
+function restoreState(){
+  try{ const raw=localStorage.getItem(LS_STATE); if(raw) applyInputs(JSON.parse(raw)); }catch(e){}
+}
+document.addEventListener('input',e=>{ if(e.target && e.target.id) persistState(); });
+
+// ══════════════════════════════════════════════
+// ESCENARIOS guardados (guardar / cargar / comparar)
+// ══════════════════════════════════════════════
+function loadScenarios(){ try{ return JSON.parse(localStorage.getItem(LS_SCEN)||'{}'); }catch(e){ return {}; } }
+function storeScenarios(o){ try{ localStorage.setItem(LS_SCEN,JSON.stringify(o)); }catch(e){} }
+function currentKPIs(){
+  if(typeof update==='function') update();
+  const g=id=>{const e=document.getElementById(id); return e?e.textContent:'—';};
+  const v=getVals();
+  return {
+    flota:v.flota, plazo:v.plazo, tarifa:v.tarifa,
+    capex:g('mv-capex'),
+    opex:fmtCLP(window.__OPEX_MES__||v.opex,true),
+    van:g('mv-van'), tir:g('mv-tir'), payback:g('mv-payback')
+  };
+}
+function saveScenario(){
+  const nameEl=document.getElementById('scn-name');
+  const name=(nameEl&&nameEl.value.trim())||('Escenario '+(Object.keys(loadScenarios()).length+1));
+  const scn=loadScenarios();
+  scn[name]={inputs:collectInputs(), kpis:currentKPIs(), ts:Date.now()};
+  storeScenarios(scn);
+  if(nameEl) nameEl.value='';
+  renderScenarios();
+}
+function deleteScenario(name){ const s=loadScenarios(); delete s[name]; storeScenarios(s); renderScenarios(); }
+function applyScenario(name){
+  const s=loadScenarios()[name];
+  if(!s) return;
+  applyInputs(s.inputs);
+  recalcAll();
+  persistState();
+  navTo('evaluador');
+}
+function renderScenarios(){
+  const tb=document.getElementById('scn-tbody');
+  if(!tb) return;
+  const s=loadScenarios();
+  const names=Object.keys(s);
+  if(names.length===0){ tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:14px">Sin escenarios guardados aún.</td></tr>'; return; }
+  tb.innerHTML=names.map(n=>{
+    const k=s[n].kpis||{};
+    const esc=n.replace(/'/g,"\\'");
+    return '<tr>'+
+      '<td style="text-align:left;font-weight:600;color:var(--text2)">'+n+'</td>'+
+      '<td>'+(k.flota!=null?Number(k.flota).toLocaleString('es-CL'):'—')+'</td>'+
+      '<td>'+(k.plazo!=null?k.plazo+'m':'—')+'</td>'+
+      '<td>'+(k.tarifa!=null?Number(k.tarifa).toLocaleString('es-CL',{maximumFractionDigits:3})+' UF':'—')+'</td>'+
+      '<td>'+(k.capex||'—')+'</td>'+
+      '<td>'+(k.opex||'—')+'</td>'+
+      '<td>'+(k.van||'—')+'</td>'+
+      '<td>'+(k.tir||'—')+'</td>'+
+      '<td>'+(k.payback||'—')+'</td>'+
+      '<td style="white-space:nowrap"><button onclick="applyScenario(\''+esc+'\')" style="padding:5px 10px;border-radius:6px;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;margin-right:4px">Cargar</button>'+
+      '<button onclick="deleteScenario(\''+esc+'\')" style="padding:5px 9px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--red);font-size:11px;font-weight:700;cursor:pointer">✕</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// EXPORTAR PDF — ventana de impresión con resumen de marca Fluxus
+// ══════════════════════════════════════════════
+function exportPDF(){
+  if(typeof update==='function') update();
+  const g=id=>{const e=document.getElementById(id); return e?e.textContent:'—';};
+  const v=getVals();
+  const P=window.__CAPEX_PARTS__||{};
+  const capexTot=fmtCLP(window.__CAPEX_TOTAL__||0,false);
+  const capexBus=fmtCLP(window.__CAPEX_BUS__||0,false);
+  const opexMes=fmtCLP(window.__OPEX_MES__||v.opex,false);
+  const kit=fmtCLP(window.__COSTO_KIT__||0,false);
+  const dias=window.__CAPEX_DIAS__||'—';
+  const prob=(typeof estimaProbMC==='function')?estimaProbMC():null;
+  const fecha=new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
+  const w=window.open('','_blank');
+  if(!w){ alert('Permite las ventanas emergentes para exportar el PDF.'); return; }
+  const row=(k,val)=>'<tr><td>'+k+'</td><td style="text-align:right;font-family:monospace">'+val+'</td></tr>';
+  const html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Fluxus — Evaluación financiera</title>'+
+  '<style>*{box-sizing:border-box;margin:0;padding:0}'+
+  'body{font-family:Georgia,serif;color:#0A1D3A;padding:40px 48px;font-size:13px;line-height:1.5}'+
+  '.head{border-bottom:3px solid #2B7FD6;padding-bottom:16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end}'+
+  '.brand{font-size:26px;font-weight:bold}.brand span{color:#2B7FD6}'+
+  '.sub{font-size:11px;color:#4A5568;letter-spacing:.12em;text-transform:uppercase;margin-top:4px}'+
+  '.meta{font-size:11px;color:#4A5568;text-align:right;font-family:Calibri,sans-serif}'+
+  'h2{font-size:14px;color:#2B7FD6;margin:22px 0 8px;border-bottom:1px solid #dbe3ee;padding-bottom:5px}'+
+  'table{width:100%;border-collapse:collapse;margin-bottom:6px}'+
+  'td{padding:6px 4px;border-bottom:1px solid #eef2f7;font-family:Calibri,sans-serif}td:first-child{color:#4A5568}'+
+  '.kpis{display:flex;gap:12px;margin:10px 0 4px}'+
+  '.kpi{flex:1;border:1px solid #dbe3ee;border-radius:8px;padding:12px;text-align:center}'+
+  '.kpi .l{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#94A3B8}'+
+  '.kpi .x{font-size:20px;font-weight:bold;font-family:monospace;margin-top:4px}'+
+  '.foot{margin-top:30px;padding-top:12px;border-top:1px solid #dbe3ee;font-size:10px;color:#94A3B8;font-family:Calibri,sans-serif}'+
+  '@media print{body{padding:24px}}</style></head><body>'+
+  '<div class="head"><div><div class="brand">Flux<span>us</span></div><div class="sub">Evaluación financiera del proyecto</div></div>'+
+  '<div class="meta">Generado: '+fecha+'<br>Flota evaluada: '+v.flota.toLocaleString('es-CL')+' buses</div></div>'+
+  '<div class="kpis">'+
+  '<div class="kpi"><div class="l">VAN</div><div class="x">'+g('mv-van')+'</div></div>'+
+  '<div class="kpi"><div class="l">TIR</div><div class="x">'+g('mv-tir')+'</div></div>'+
+  '<div class="kpi"><div class="l">Payback</div><div class="x">'+g('mv-payback')+'</div></div>'+
+  '<div class="kpi"><div class="l">Prob. éxito</div><div class="x">'+(prob!=null?(prob*100).toFixed(0)+'%':'—')+'</div></div></div>'+
+  '<h2>Supuestos de operación</h2><table>'+
+  row('Flota de buses',v.flota.toLocaleString('es-CL'))+
+  row('Plazo del contrato',v.plazo+' meses')+
+  row('Tarifa por bus/mes',v.tarifa.toLocaleString('es-CL',{maximumFractionDigits:3})+' UF/bus/mes (≈ $'+Math.round(v.tarifa*40000).toLocaleString('es-CL')+'/bus/mes)')+
+  row('Ramp-up de despliegue',v.ramp===0?'Inmediato':v.ramp+' meses')+
+  row('Tasa de descuento',(v.tdescPct/10).toFixed(1)+'% / mes')+
+  row('Crédito',v.pcred===0?'Sin crédito':v.pcred+' meses al '+v.icredPct+'%/año')+
+  '</table><h2>CAPEX — inversión inicial</h2><table>'+
+  row('Costo kit / bus (neto)',kit)+
+  row('Subtotal por-bus (× flota)',fmtCLP(P.subBus||0,false))+
+  row('Campaña de instalación',fmtCLP(P.subCamp||0,false))+
+  row('Días de campaña',dias+' días')+
+  row('CAPEX total',capexTot)+
+  row('CAPEX por bus',capexBus)+
+  '</table><h2>OPEX — costo operacional mensual</h2><table>'+
+  row('OPEX total / mes',opexMes)+
+  row('OPEX por bus / mes',fmtCLP((window.__OPEX_MES__||v.opex)/Math.max(1,v.flota),false))+
+  row('Ingreso mensual (flota completa)',g('mv-ingreso'))+
+  row('Flujo neto / mes (flota completa)',g('mv-flujo'))+
+  row('Margen operacional',g('mv-margen'))+
+  '</table><div class="foot">Fluxus Ingeniería · V&amp;R Ingeniería — Documento generado por el Evaluador Financiero Fluxus. Cifras netas sin IVA. Modelo referencial para evaluación de proyecto; no constituye oferta.</div>'+
+  '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},250);}<\/scr'+'ipt></body></html>';
+  w.document.write(html);
+  w.document.close();
+}
+
+</script>
+</body>
+</html>
