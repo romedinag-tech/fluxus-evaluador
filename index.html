@@ -314,19 +314,21 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
   .scenario-panel{padding:14px}
 
   /* CAPEX / OPEX tables → card layout */
-  .cx-table thead{display:none}
-  .cx-table tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center}
-  .cx-table tbody tr.cx-tot-row{grid-template-columns:1fr auto;background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:4px}
-  .cx-table td{padding:0;border:none;text-align:left!important;font-size:12px}
-  .cx-table td:first-child{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:2px}
-  .cx-table td.cx-calc{color:var(--accent);font-weight:600;font-size:13px}
+  .cx-cards thead{display:none}
+  .cx-cards tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center}
+  .cx-cards tbody tr.cx-tot-row{grid-template-columns:1fr auto;background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:4px}
+  .cx-cards td{padding:0;border:none;text-align:left!important;font-size:12px}
+  .cx-cards td:first-child{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:2px}
+  .cx-cards td.cx-calc{color:var(--accent);font-weight:600;font-size:13px}
   .cx-in{width:100%!important;font-size:13px!important}
   /* label for inputs */
-  .cx-table td:nth-child(2)::before{content:'P/U: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
-  .cx-table td:nth-child(3)::before{content:'Cant.: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
-  .cx-table td:nth-child(4)::before{content:'Total: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
-  .cx-table tbody tr.cx-tot-row td:first-child::before{display:none}
-  .cx-table tbody tr.cx-tot-row td:nth-child(2)::before,.cx-table tbody tr.cx-tot-row td:nth-child(3)::before,.cx-table tbody tr.cx-tot-row td:nth-child(4)::before{display:none}
+  .cx-cards td:nth-child(2)::before{content:'P/U: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
+  .cx-cards td:nth-child(3)::before{content:'Cant.: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
+  .cx-cards td:nth-child(4)::before{content:'Total: ';font-size:10px;color:var(--text3);display:block;margin-bottom:2px}
+  .cx-cards tbody tr.cx-tot-row td:first-child::before{display:none}
+  .cx-cards tbody tr.cx-tot-row td:nth-child(2)::before,.cx-cards tbody tr.cx-tot-row td:nth-child(3)::before,.cx-cards tbody tr.cx-tot-row td:nth-child(4)::before{display:none}
+  .cx-slider-row{flex-wrap:wrap;gap:8px}
+  .cx-slider-row .cx-in{flex:1;min-width:120px}
   /* cx-panel padding */
   .cx-panel{padding:16px 14px}
   .cx-grand{padding:16px 18px}
@@ -369,7 +371,7 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
 .cx-table td{padding:7px 10px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);text-align:right}
 .cx-table td:first-child{text-align:left;font-weight:500}
 .cx-table tr:last-child td{border-bottom:none}
-.cx-in{font-family:var(--mono);font-size:13px;width:115px;text-align:right;padding:7px 9px;border:1px solid var(--border2);border-radius:7px;background:var(--bg);color:var(--text);outline:none}
+.cx-in{font-family:var(--mono);font-size:13px;width:115px;max-width:100%;box-sizing:border-box;text-align:right;padding:7px 9px;border:1px solid var(--border2);border-radius:7px;background:var(--bg);color:var(--text);outline:none}
 .cx-in:focus{border-color:var(--accent)}
 .cx-in.locked{background:var(--bg3);color:var(--text2);cursor:not-allowed}
 .cx-calc{font-family:var(--mono);font-weight:600;color:var(--text2)}
@@ -519,7 +521,7 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
           <span style="font-size:12px;color:var(--text3)">buses</span>
         </div>
       </div>
-      <table class="cx-table">
+      <table class="cx-table cx-cards">
         <thead><tr><th>Componente</th><th>P/U neto (CLP)</th><th>Cantidad</th><th>Total</th></tr></thead>
         <tbody>
           <tr>
@@ -554,7 +556,7 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
     <div class="cx-panel">
       <h3>Campaña de instalación (one-time)</h3>
       <p class="cx-sub">Los días de campaña se calculan: flota ÷ (instaladores × productividad). Cuadrillas de 4 (1 supervisor + 3 instaladores) por camioneta. Valores netos sin IVA.</p>
-      <table class="cx-table">
+      <table class="cx-table cx-cards">
         <thead><tr><th>Parámetro de campaña</th><th>P/U neto (CLP)</th><th>Cantidad</th><th>Total</th></tr></thead>
         <tbody>
           <tr>
@@ -699,7 +701,7 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
       </button>
     </div>
     <p class="cx-sub">Define cantidad y precio unitario de cada ítem. Pon cantidad 0 en los que no apliquen desde el inicio. <strong>AMC</strong> = A Mínimo Costo: solo los ítems tecnológicos esenciales.</p>
-    <table class="cx-table">
+    <table class="cx-table cx-cards">
       <thead><tr><th>Ítem</th><th>P/U mensual (CLP)</th><th>Cantidad</th><th>Total / mes</th></tr></thead>
       <tbody>
         <tr>
@@ -1306,11 +1308,33 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
       <div>
         <div class="cx-slider-row"><label>CAPEX kit/bus (reutilizable, CLP)</label><input class="cx-in" id="ca-kit" value="400000"></div>
         <div class="cx-slider-row"><label>CAPEX instalación/bus (por despliegue, CLP)</label><input class="cx-in" id="ca-install" value="75000"></div>
-        <div class="cx-slider-row"><label>OPEX fijo / mes (CLP)</label><input class="cx-in" id="ca-opexfijo" value="4000000"></div>
-        <div class="cx-slider-row"><label>OPEX variable / bus / mes (CLP)</label><input class="cx-in" id="ca-opexvar" value="12000"></div>
+        <div class="cx-slider-row"><label>Umbral AMC → equipo completo (buses)</label><input class="cx-in" id="ca-umbral" value="200"></div>
+        <div class="cx-slider-row"><label>Elasticidad de escala OPEX (β &lt; 1)</label><input class="cx-in" id="ca-beta" value="0.6"></div>
+        <div class="cx-slider-row"><label>Reinversión (% de la utilidad neta)</label><input class="cx-in" id="ca-reinv" value="30"></div>
       </div>
     </div>
     <p class="cx-note">El kit (cámara + host) se compra una vez, se deprecia en su vida útil y se reutiliza entre contratos mientras tenga vida. La instalación (cableado, enclosure, mano de obra) se incurre en cada despliegue. Valores netos sin IVA, en pesos de hoy (términos reales).</p>
+  </div>
+
+  <div class="cx-panel">
+    <h3>OPEX mensual — AMC y economía de escala</h3>
+    <p class="cx-sub">Bajo el umbral de flota se opera a mínimo costo (solo ítems esenciales). Al superarlo se activan los ítems "en 1" (equipo completo), cuyo bloque fijo crece con elasticidad β (menos que el ingreso). Valores netos, pesos de hoy.</p>
+    <div class="cx-grid2">
+      <div>
+        <div class="obj-label" style="margin-bottom:8px">AMC — siempre activos</div>
+        <div class="cx-slider-row"><label>Técnico de terreno / mes</label><input class="cx-in" id="ca-op-tec" value="900000"></div>
+        <div class="cx-slider-row"><label>Software / cloud base / mes</label><input class="cx-in" id="ca-op-swbase" value="180000"></div>
+        <div class="cx-slider-row"><label>Correo + web / mes</label><input class="cx-in" id="ca-op-web" value="25000"></div>
+        <div class="cx-slider-row"><label>Software / cloud por bus / mes</label><input class="cx-in" id="ca-op-swbus" value="1200"></div>
+      </div>
+      <div>
+        <div class="obj-label" style="margin-bottom:8px">Equipo completo — sobre el umbral</div>
+        <div class="cx-slider-row"><label>Analista ingeniero / mes</label><input class="cx-in" id="ca-op-analista" value="1800000"></div>
+        <div class="cx-slider-row"><label>Arriendo oficina / bodega / mes</label><input class="cx-in" id="ca-op-oficina" value="800000"></div>
+        <div class="cx-slider-row"><label>Leasing camioneta / mes</label><input class="cx-in" id="ca-op-camioneta" value="550000"></div>
+      </div>
+    </div>
+    <p class="cx-note" id="ca-opex-note">—</p>
   </div>
 
   <div class="cx-panel">
@@ -1346,8 +1370,14 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
       <div class="cx-kv"><span class="kv-k">Kits comprados</span><span class="kv-v" id="ca-kits">—</span></div>
       <div class="cx-kv"><span class="kv-k">Kits ahorrados por reúso</span><span class="kv-v" id="ca-reuse" style="color:var(--accent)">—</span></div>
       <div class="cx-kv"><span class="kv-k">Ahorro por reúso (CLP)</span><span class="kv-v" id="ca-reuse-clp" style="color:var(--accent)">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Reinversión (% util.)</span><span class="kv-v" id="ca-reinv-total" style="color:var(--gold)">—</span></div>
       <div class="cx-kv" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:12px"><span class="kv-k" style="font-weight:700">CAPEX total</span><span class="kv-v" id="ca-capex" style="color:var(--blue);font-size:15px">—</span></div>
     </div>
+  </div>
+
+  <div class="chart-panel" style="margin-bottom:20px">
+    <div class="chart-panel-header"><span class="chart-panel-title">Evolución de la utilidad neta (anual)</span></div>
+    <div class="chart-area"><div class="chart-canvas-wrap"><canvas id="ca-chart2"></canvas></div></div>
   </div>
 
   <div class="cx-panel">
@@ -2741,7 +2771,7 @@ let caCohorts=[
   {nombre:'Cohorte 3', mes:1, anio:2028, buses:200, plazo:24, tarifa:2}
 ];
 try{const _s=localStorage.getItem('fluxus_cohorts'); if(_s){const a=JSON.parse(_s); if(Array.isArray(a)&&a.length) caCohorts=a;}}catch(e){}
-let caChart=null;
+let caChart=null, caChart2=null;
 function caSave(){ try{ localStorage.setItem('fluxus_cohorts',JSON.stringify(caCohorts)); }catch(e){} }
 function caG(id,def){const e=document.getElementById(id); const x=e?parseFloat(e.value):NaN; return isNaN(x)?def:x;}
 function caRender(){
@@ -2773,8 +2803,13 @@ function updateCartera(){
   const life=Math.max(1,Math.round(caG('ca-vida',6)*12));
   const kitC=caG('ca-kit',400000);
   const instC=caG('ca-install',75000);
-  const opexFijo=caG('ca-opexfijo',4000000);
-  const opexVar=caG('ca-opexvar',12000);
+  const umbral=Math.max(1,caG('ca-umbral',200));
+  const beta=caG('ca-beta',0.6);
+  const reinvPct=Math.max(0,Math.min(100,caG('ca-reinv',30)))/100;
+  const opTec=caG('ca-op-tec',900000), opSwBase=caG('ca-op-swbase',180000), opWeb=caG('ca-op-web',25000), opSwBus=caG('ca-op-swbus',1200);
+  const opAnalista=caG('ca-op-analista',1800000), opOficina=caG('ca-op-oficina',800000), opCamioneta=caG('ca-op-camioneta',550000);
+  const amcFijo=opTec+opSwBase+opWeb, fullFijo=opAnalista+opOficina+opCamioneta;
+  const caOpexMonth=function(b){ if(b<=0) return 0; const variable=opSwBus*b; if(b<=umbral) return amcFijo+variable; return (amcFijo+fullFijo)*Math.pow(b/umbral,beta)+variable; };
   const diasCobro=caG('ca-dias',60);
   const UF=40000;
   if(caCohorts.length===0){ document.getElementById('ca-annual-body').innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px">Agrega al menos una cohorte.</td></tr>'; return; }
@@ -2803,19 +2838,21 @@ function updateCartera(){
   // ----- series mensuales -----
   const rev=new Array(H).fill(0), bus=new Array(H).fill(0), opex=new Array(H).fill(0), dep=new Array(H).fill(0);
   cs.forEach(c=>{ for(let t=Math.max(0,c.start);t<Math.min(c.end,H);t++){ rev[t]+=c.buses*c.tarifa*UF; bus[t]+=c.buses; } });
-  for(let t=0;t<H;t++){ opex[t]=(bus[t]>0?opexFijo:0)+opexVar*bus[t]; }
+  for(let t=0;t<H;t++){ opex[t]=caOpexMonth(bus[t]); }
   kits.forEach(kit=>{ for(let t=Math.max(0,kit.purchase);t<Math.min(kit.purchase+life,H);t++){ dep[t]+=kitC/life; } });
   // ----- impuesto mensual con arrastre de pérdidas -----
   const taxArr=new Array(H).fill(0); let acc=0;
   for(let t=0;t<H;t++){ const base=rev[t]-opex[t]-dep[t]; if(base<0){acc+=-base;} else {const off=Math.min(acc,base);acc-=off;taxArr[t]=(base-off)*tax;} }
   // ----- capital de trabajo + FCF mensual -----
   const wc=new Array(H).fill(0); for(let t=0;t<H;t++) wc[t]=rev[t]*(diasCobro/30);
-  const fcf=new Array(H).fill(0);
-  let totalRev=0,totalTax=0,totalCapex=0;
+  const fcf=new Array(H).fill(0), netInc=new Array(H).fill(0), reinvArr=new Array(H).fill(0);
+  let totalRev=0,totalTax=0,totalCapex=0,totalReinv=0;
   for(let t=0;t<H;t++){
     const dWC = wc[t]-(t>0?wc[t-1]:0);
-    fcf[t]=rev[t]-opex[t]-taxArr[t]-capexByMonth[t]-dWC;
-    totalRev+=rev[t]; totalTax+=taxArr[t]; totalCapex+=capexByMonth[t];
+    netInc[t]=rev[t]-opex[t]-dep[t]-taxArr[t];
+    reinvArr[t]=netInc[t]>0?reinvPct*netInc[t]:0;
+    fcf[t]=rev[t]-opex[t]-taxArr[t]-capexByMonth[t]-dWC-reinvArr[t];
+    totalRev+=rev[t]; totalTax+=taxArr[t]; totalCapex+=capexByMonth[t]; totalReinv+=reinvArr[t];
   }
   // valor residual del hardware con vida remanente + liberación de WC al cierre
   let residual=0; kits.forEach(kit=>{ const rem=(kit.purchase+life)-H; if(rem>0) residual+=kitC*(rem/life); });
@@ -2823,9 +2860,9 @@ function updateCartera(){
   // ----- agregación anual -----
   const years=Math.ceil(H/12); const A=[];
   for(let y=0;y<years;y++){
-    let R0=0,O=0,D=0,T=0,C=0,F=0,bEnd=0;
-    for(let m=y*12;m<Math.min((y+1)*12,H);m++){ R0+=rev[m];O+=opex[m];D+=dep[m];T+=taxArr[m];C+=capexByMonth[m];F+=fcf[m]; bEnd=bus[m]; }
-    A.push({y:y,rev:R0,opex:O,dep:D,tax:T,capex:C,fcf:F,busEnd:bEnd});
+    let R0=0,O=0,D=0,T=0,C=0,F=0,N=0,bEnd=0;
+    for(let m=y*12;m<Math.min((y+1)*12,H);m++){ R0+=rev[m];O+=opex[m];D+=dep[m];T+=taxArr[m];C+=capexByMonth[m];F+=fcf[m];N+=netInc[m]; bEnd=bus[m]; }
+    A.push({y:y,rev:R0,opex:O,dep:D,tax:T,capex:C,fcf:F,net:N,busEnd:bEnd});
   }
   let van=0; A.forEach((a,y)=> van+=a.fcf/Math.pow(1+r,y+1));
   const tir=calcTIR([0].concat(A.map(a=>a.fcf)));
@@ -2845,12 +2882,14 @@ function updateCartera(){
   set('ca-reuse',reuseKits.toLocaleString('es-CL')+' kits');
   set('ca-reuse-clp',fmtCLP(reuseKits*kitC,true));
   set('ca-capex',fmtCLP(totalCapex,true));
+  set('ca-reinv-total',(reinvPct*100).toFixed(0)+'% · '+fmtCLP(totalReinv,true));
+  const _on=document.getElementById('ca-opex-note'); if(_on) _on.textContent='Bajo '+umbral+' buses: AMC = '+fmtCLP(amcFijo,true)+'/mes fijo + '+fmtCLP(opSwBus,false)+'/bus. Sobre '+umbral+': se suman analista, oficina y camioneta; el bloque fijo escala como (flota/'+umbral+')^'+beta+', creciendo menos que el ingreso (economía de escala).';
   const baseYear=Math.floor(minAbs/12);
   let html='',cumF=0;
   A.forEach(function(a){ cumF+=a.fcf; const ebitda=a.rev-a.opex; const util=a.rev-a.opex-a.dep-a.tax;
     html+='<tr><td>'+(baseYear+a.y)+'</td><td>'+a.busEnd.toLocaleString('es-CL')+'</td><td>'+fmtCLP(a.rev,true)+'</td><td class="td-neg">'+fmtCLP(-a.opex,true)+'</td><td>'+fmtCLP(ebitda,true)+'</td><td class="td-neg">'+fmtCLP(-a.dep,true)+'</td><td class="td-neg">'+fmtCLP(-a.tax,true)+'</td><td class="'+(util>=0?'td-pos':'td-neg')+'">'+fmtCLP(util,true)+'</td><td class="td-neg">'+fmtCLP(-a.capex,true)+'</td><td class="'+(a.fcf>=0?'td-pos':'td-neg')+'">'+fmtCLP(a.fcf,true)+'</td><td class="'+(cumF>=0?'td-pos':'td-neg')+'">'+fmtCLP(cumF,true)+'</td></tr>'; });
   document.getElementById('ca-annual-body').innerHTML=html;
-  set('ca-note','VAN '+fmtCLP(van,true)+' · TIR '+(tir!=null?(tir*100).toFixed(1)+'%/año':'N/A')+' · payback '+(pay?('año '+pay):'>'+years+' años')+'. El reúso evitó comprar '+reuseKits+' kits (≈ '+fmtCLP(reuseKits*kitC,true)+'). Incluye valor residual del hardware con vida remanente y liberación de capital de trabajo al cierre del horizonte.');
+  set('ca-note','VAN '+fmtCLP(van,true)+' · TIR '+(tir!=null?(tir*100).toFixed(1)+'%/año':'N/A')+' · payback '+(pay?('año '+pay):'>'+years+' años')+'. El reúso evitó comprar '+reuseKits+' kits (≈ '+fmtCLP(reuseKits*kitC,true)+'). Incluye valor residual del hardware con vida remanente y liberación de capital de trabajo al cierre. Reinversión '+(reinvPct*100).toFixed(0)+'% de utilidades = '+fmtCLP(totalReinv,true)+', restada del flujo al socio.');
   // gráfico
   const labels=A.map(a=>String(baseYear+a.y));
   const busSeries=A.map(a=>a.busEnd);
@@ -2862,8 +2901,14 @@ function updateCartera(){
   const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+(c.dataset.yAxisID==='y1'?fmtCLP(c.parsed.y,true):c.parsed.y+' buses');}}}},scales:{x:{ticks:{color:'#55536a',font:{size:11}},grid:{display:false}},y:{position:'left',ticks:{color:'#55536a',font:{size:10}},grid:{color:'rgba(10,29,58,0.05)'},title:{display:true,text:'Buses',color:'#94A3B8',font:{size:10}}},y1:{position:'right',ticks:{color:'#55536a',font:{size:10},callback:function(v){return fmtCLP(v,true);}},grid:{display:false},title:{display:true,text:'FCF acum.',color:'#94A3B8',font:{size:10}}}}};
   const cv=document.getElementById('ca-chart');
   if(cv){ if(caChart) caChart.destroy(); caChart=new Chart(cv,{type:'bar',data:{labels:labels,datasets:ds},options:opts}); }
+  // segundo gráfico: utilidad neta anual
+  const netSeries=A.map(a=>a.net);
+  const ds2=[{type:'bar',label:'Utilidad neta',data:netSeries,backgroundColor:netSeries.map(v=>v>=0?'rgba(31,157,107,0.5)':'rgba(192,34,46,0.5)'),borderColor:netSeries.map(v=>v>=0?'#1F9D6B':'#C0222E'),borderWidth:1}];
+  const opts2={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return 'Utilidad neta: '+fmtCLP(c.parsed.y,true);}}}},scales:{x:{ticks:{color:'#55536a',font:{size:11}},grid:{display:false}},y:{ticks:{color:'#55536a',font:{size:10},callback:function(v){return fmtCLP(v,true);}},grid:{color:'rgba(10,29,58,0.05)'}}}};
+  const cv2=document.getElementById('ca-chart2');
+  if(cv2){ if(caChart2) caChart2.destroy(); caChart2=new Chart(cv2,{type:'bar',data:{labels:labels,datasets:ds2},options:opts2}); }
 }
-['ca-horizonte','ca-tasa','ca-tax','ca-vida','ca-kit','ca-install','ca-opexfijo','ca-opexvar','ca-dias'].forEach(function(id){var e=document.getElementById(id); if(e) e.addEventListener('input',updateCartera);});
+['ca-horizonte','ca-tasa','ca-tax','ca-vida','ca-kit','ca-install','ca-dias','ca-umbral','ca-beta','ca-reinv','ca-op-tec','ca-op-swbase','ca-op-web','ca-op-swbus','ca-op-analista','ca-op-oficina','ca-op-camioneta'].forEach(function(id){var e=document.getElementById(id); if(e) e.addEventListener('input',updateCartera);});
 caRender();
 
 </script>
