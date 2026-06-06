@@ -423,6 +423,7 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
     <button class="sb-link" data-sec="evaluador" onclick="navTo('evaluador')"><span class="sb-ic">📊</span> Evaluador</button>
     <button class="sb-link" data-sec="montecarlo" onclick="navTo('montecarlo')"><span class="sb-ic">🎲</span> Montecarlo</button>
     <button class="sb-link" data-sec="objetivo" onclick="navTo('objetivo')"><span class="sb-ic">🎯</span> Escenario Objetivo</button>
+    <button class="sb-link" data-sec="cartera" onclick="navTo('cartera')"><span class="sb-ic">🗂️</span> Cartera escalonada</button>
   </nav>
   <div class="sb-foot">Fluxus Ingeniería<br>Modelo financiero</div>
 </aside>
@@ -463,6 +464,7 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
           <span class="fa-unit">UF/mes</span>
         </div>
         <div class="fa-eq" id="home-tarifa-eq">≈ $80.000 /bus/mes · 1 UF = $40.000</div>
+        <div class="fa-eq" id="home-breakeven" style="margin-top:4px;color:var(--accent)">—</div>
       </div>
     </div>
     <div class="fa-hint">Estos valores alimentan CAPEX, OPEX, Evaluador, Montecarlo y Escenario Objetivo de forma consistente.</div>
@@ -958,6 +960,25 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
           <div class="slider-limits"><span>5%</span><span>60%</span></div>
         </div>
 
+        <div class="slider-item">
+          <div class="slider-top">
+            <span class="slider-name">Impuesto a la renta</span>
+            <span class="slider-val" id="v-tax">27%</span>
+          </div>
+          <input type="range" id="sl-tax" min="0" max="40" step="1" value="27">
+          <div class="slider-limits"><span>0%</span><span>40%</span></div>
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-top">
+            <span class="slider-name">Depreciación del CAPEX</span>
+            <span class="slider-val" id="v-dep">6 años</span>
+          </div>
+          <input type="range" id="sl-dep" min="1" max="10" step="1" value="6">
+          <div class="slider-limits"><span>1 año</span><span>10 años</span></div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:5px">Escudo tributario: la depreciación reduce la base imponible. Modelo en términos reales (UF): OPEX en pesos de hoy y tasa de descuento real.</div>
+        </div>
+
       </div>
     </div>
 
@@ -1262,6 +1283,85 @@ footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);displ
   </div>
 </div>
 
+<!-- ══ CARTERA ESCALONADA ══════════════════════════════ -->
+<div id="sec-cartera" class="tab-section">
+  <div class="obj-intro" style="background:var(--accent-dim);border-color:var(--accent-dim2)">
+    <div class="obj-intro-icon">🗂️</div>
+    <div class="obj-intro-text">
+      <h3 style="color:var(--accent)">Cartera escalonada — despliegue incremental multi-cohorte</h3>
+      <p>Evalúa varios contratos que entran en distintas fechas (mes/año), cada uno con su tarifa. Al vencer, los contratos liberan equipos; las cámaras (vida útil configurable) se reutilizan en cohortes nuevas, por lo que el CAPEX baja. Horizonte largo, flujo anual después de impuestos con escudo de depreciación. Herramienta complementaria; no reemplaza la evaluación de flota única.</p>
+    </div>
+  </div>
+
+  <div class="cx-panel">
+    <h3>Parámetros globales</h3>
+    <div class="cx-grid2">
+      <div>
+        <div class="cx-slider-row"><label>Horizonte (años)</label><input class="cx-in" id="ca-horizonte" value="8"></div>
+        <div class="cx-slider-row"><label>Tasa de descuento real (%/año)</label><input class="cx-in" id="ca-tasa" value="10"></div>
+        <div class="cx-slider-row"><label>Impuesto a la renta (%)</label><input class="cx-in" id="ca-tax" value="27"></div>
+        <div class="cx-slider-row"><label>Vida útil cámara/kit (años)</label><input class="cx-in" id="ca-vida" value="6"></div>
+        <div class="cx-slider-row"><label>Días de cobro (capital de trabajo)</label><input class="cx-in" id="ca-dias" value="60"></div>
+      </div>
+      <div>
+        <div class="cx-slider-row"><label>CAPEX kit/bus (reutilizable, CLP)</label><input class="cx-in" id="ca-kit" value="400000"></div>
+        <div class="cx-slider-row"><label>CAPEX instalación/bus (por despliegue, CLP)</label><input class="cx-in" id="ca-install" value="75000"></div>
+        <div class="cx-slider-row"><label>OPEX fijo / mes (CLP)</label><input class="cx-in" id="ca-opexfijo" value="4000000"></div>
+        <div class="cx-slider-row"><label>OPEX variable / bus / mes (CLP)</label><input class="cx-in" id="ca-opexvar" value="12000"></div>
+      </div>
+    </div>
+    <p class="cx-note">El kit (cámara + host) se compra una vez, se deprecia en su vida útil y se reutiliza entre contratos mientras tenga vida. La instalación (cableado, enclosure, mano de obra) se incurre en cada despliegue. Valores netos sin IVA, en pesos de hoy (términos reales).</p>
+  </div>
+
+  <div class="cx-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px">
+      <h3 style="margin-bottom:0">Cohortes / proyectos</h3>
+      <button onclick="caAdd()" style="padding:8px 14px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer">+ Agregar cohorte</button>
+    </div>
+    <p class="cx-sub">Cada cohorte es un contrato: define cuándo entra (mes/año), cuántos buses, el plazo y su tarifa.</p>
+    <div class="table-wrap">
+      <table class="cx-table">
+        <thead><tr><th>Proyecto</th><th>Mes inicio</th><th>Año</th><th>Buses</th><th>Plazo (m)</th><th>Tarifa UF/mes</th><th></th></tr></thead>
+        <tbody id="ca-cohorts-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+    <div class="metric-card is-pos"><div class="metric-label">VAN (después de imp.)</div><div class="metric-value" id="ca-van">—</div><div class="metric-sub" id="ca-van-sub">a tasa real</div></div>
+    <div class="metric-card is-blue"><div class="metric-label">TIR anual</div><div class="metric-value" id="ca-tir">—</div><div class="metric-sub">real</div></div>
+    <div class="metric-card"><div class="metric-label">Ingreso total</div><div class="metric-value" id="ca-ing">—</div><div class="metric-sub">horizonte</div></div>
+    <div class="metric-card is-warn"><div class="metric-label">Impuesto total</div><div class="metric-value" id="ca-imp">—</div><div class="metric-sub">renta</div></div>
+  </div>
+
+  <div class="bottom-grid" style="grid-template-columns:1.4fr 1fr">
+    <div class="chart-panel">
+      <div class="chart-panel-header"><span class="chart-panel-title">Buses activos y FCF acumulado</span></div>
+      <div class="chart-area"><div class="chart-canvas-wrap"><canvas id="ca-chart"></canvas></div></div>
+    </div>
+    <div class="cx-panel" style="margin-bottom:0">
+      <h3>Hardware y reúso</h3>
+      <div class="cx-kv"><span class="kv-k">Buses pico simultáneos</span><span class="kv-v" id="ca-pico">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Instalaciones totales</span><span class="kv-v" id="ca-installs">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Kits comprados</span><span class="kv-v" id="ca-kits">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Kits ahorrados por reúso</span><span class="kv-v" id="ca-reuse" style="color:var(--accent)">—</span></div>
+      <div class="cx-kv"><span class="kv-k">Ahorro por reúso (CLP)</span><span class="kv-v" id="ca-reuse-clp" style="color:var(--accent)">—</span></div>
+      <div class="cx-kv" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:12px"><span class="kv-k" style="font-weight:700">CAPEX total</span><span class="kv-v" id="ca-capex" style="color:var(--blue);font-size:15px">—</span></div>
+    </div>
+  </div>
+
+  <div class="cx-panel">
+    <h3>Estado de resultados y flujo (anual, después de impuestos)</h3>
+    <div class="table-wrap">
+      <table class="cx-table">
+        <thead><tr><th>Año</th><th>Buses (fin)</th><th>Ingresos</th><th>OPEX</th><th>EBITDA</th><th>Deprec.</th><th>Impuesto</th><th>Util. neta</th><th>CAPEX</th><th>FCF</th><th>FCF acum.</th></tr></thead>
+        <tbody id="ca-annual-body"></tbody>
+      </table>
+    </div>
+    <p class="cx-note" id="ca-note">—</p>
+  </div>
+</div>
+
 <footer>
   <span>Fluxus · Evaluador Financiero · Proyecto Buses</span>
   <span>OPEX fijo + CAPEX variable por bus · Crédito sistema francés · 10.000 iteraciones</span>
@@ -1299,10 +1399,38 @@ function fmtCLP(n,short=false){
   return(n<0?'-':'')+'$'+s;
 }
 
+// Flujos de caja a patrimonio DESPUÉS de impuestos (escudo de depreciación + intereses deducibles)
+function projectFlows(p){
+  const capex=p.capexBus*p.flota;
+  const ingresoFull=p.flota*p.tarifaUF*40000;
+  const tCredMes=Math.pow(1+(p.icredPct||0)/100,1/12)-1;
+  const useCred=p.pcred>0;
+  const cuota=cuotaFrances(capex,tCredMes,p.pcred);
+  const depMonths=Math.max(1,Math.round((p.depYears||6)*12));
+  const depPerMonth=capex/depMonths;
+  const rate=(p.taxRate||0)/100;
+  const rampFrac=i=> p.ramp>0?Math.min(1,i/p.ramp):1;
+  let saldo=useCred?capex:0, acc=0;
+  const flujos=[useCred?0:-capex];
+  for(let i=1;i<=p.plazo;i++){
+    const ebitda=ingresoFull*rampFrac(i)-p.opexEff;
+    let interest=0;
+    if(useCred && i<=p.pcred){ interest=saldo*tCredMes; const principal=cuota-interest; saldo-=principal; }
+    const dep=i<=depMonths?depPerMonth:0;
+    const taxableRaw=ebitda-dep-interest;
+    let tax=0;
+    if(taxableRaw<0){ acc+=-taxableRaw; }
+    else { const off=Math.min(acc,taxableRaw); acc-=off; tax=(taxableRaw-off)*rate; }
+    const cuotaThis=(useCred && i<=p.pcred)?cuota:0;
+    flujos.push(ebitda - cuotaThis - tax);
+  }
+  return flujos;
+}
+
 // ══════════════════════════════════════════════
 // NAV
 // ══════════════════════════════════════════════
-const ALL_SECS=['home','capex','opex','sumario','evaluador','montecarlo','objetivo'];
+const ALL_SECS=['home','capex','opex','sumario','evaluador','montecarlo','objetivo','cartera'];
 const SEC_TITLE={
   home:['Home','Resumen del modelo y tamaño de flota.'],
   capex:['CAPEX del proyecto','Inversión inicial: kits, instalación y campaña de despliegue.'],
@@ -1310,7 +1438,8 @@ const SEC_TITLE={
   sumario:['Sumario','Resumen consolidado de CAPEX, OPEX e indicadores.'],
   evaluador:['Evaluador de Rentabilidad','VAN, TIR, payback y flujo de caja.'],
   montecarlo:['Análisis de Montecarlo','Probabilidad de éxito sobre 10.000 escenarios.'],
-  objetivo:['Escenario Objetivo','Qué se necesita para alcanzar un VAN meta.']
+  objetivo:['Escenario Objetivo','Qué se necesita para alcanzar un VAN meta.'],
+  cartera:['Cartera escalonada','Despliegue incremental multi-cohorte con reúso de hardware.']
 };
 
 function navTo(sec){
@@ -1325,6 +1454,7 @@ function navTo(sec){
   if(sec==='opex'){ recalcOpex(); pushToEvaluador(); }
   if(sec==='montecarlo')updateMCFixed();
   if(sec==='objetivo')updateObjetivo();
+  if(sec==='cartera')updateCartera();
   if(sec==='evaluador')update();
   if(sec==='sumario'){ if(typeof update==='function')update(); refreshSumario(); }
   if(sec==='home') refreshHome();
@@ -1640,12 +1770,8 @@ function estimaProbMC(){
       const tf=v.tarifa*(0.85+Math.random()*0.30);
       const op=v.opexEff*(0.85+Math.random()*0.30);
       const cx=v.capexBus*(0.85+Math.random()*0.30);
-      const F=v.flota, plazo=v.plazo;
-      const ing=tf*40000*F, eg=op, fm=ing-eg; // tf en UF/bus/mes × valor UF
-      const capex=cx*F;
-      const tDesc=(v.tdescPct/10)/100;
-      let van=-capex;
-      for(let m=1;m<=plazo;m++) van+=fm/Math.pow(1+tDesc,m);
+      const tDesc=v.tdescPct/1000;
+      const van=calcVAN(projectFlows({flota:v.flota,tarifaUF:tf,opexEff:op,capexBus:cx,plazo:v.plazo,pcred:v.pcred,icredPct:v.icredPct,ramp:v.ramp,taxRate:v.taxRate,depYears:v.depYears}),tDesc);
       if(van>0) ok++;
     }
     return ok/N;
@@ -1665,6 +1791,7 @@ function refreshHome(){
   }
   const p=estimaProbMC();
   if(p!=null) set('home-mc-v',(p*100).toFixed(0)+'% éxito');
+  updateBreakeven();
 }
 
 function refreshSumario(){
@@ -1781,6 +1908,8 @@ function getVals(){
     tdescPct:+document.getElementById('sl-tdesc').value,
     pcred:+document.getElementById('sl-pcred').value,
     icredPct:+document.getElementById('sl-icred').value,
+    taxRate:(function(){const e=document.getElementById('sl-tax');return e?+e.value:27;})(),
+    depYears:(function(){const e=document.getElementById('sl-dep');return e?+e.value:6;})(),
   };
 }
 
@@ -1803,12 +1932,29 @@ function onTarifaSlider(val){
   const inp=document.getElementById('inp-tarifa'); if(inp) inp.value=+val;
   update();
 }
+function computeBreakeven(){
+  try{
+    const v=getVals(); const tDesc=v.tdescPct/1000;
+    const van=t=>calcVAN(projectFlows({flota:v.flota,tarifaUF:t,opexEff:v.opexEff,capexBus:v.capexBus,plazo:v.plazo,pcred:v.pcred,icredPct:v.icredPct,ramp:v.ramp,taxRate:v.taxRate,depYears:v.depYears}),tDesc);
+    let lo=0,hi=50;
+    if(van(hi)<0) return null;
+    if(van(lo)>=0) return 0;
+    for(let k=0;k<60;k++){const mid=(lo+hi)/2; if(van(mid)>=0) hi=mid; else lo=mid;}
+    return hi;
+  }catch(e){ return null; }
+}
+function updateBreakeven(){
+  const el=document.getElementById('home-breakeven'); if(!el) return;
+  const be=computeBreakeven();
+  el.textContent=be==null?'Tarifa de equilibrio: fuera de rango (>50 UF/mes)':('Tarifa de equilibrio (VAN=0): '+be.toFixed(2)+' UF/mes/bus');
+}
 function onHomeTarifa(val){
   const uf=Math.max(0,Math.min(50,parseFloat(val)||0)); // UF/bus/mes
   const inp=document.getElementById('inp-tarifa'); if(inp) inp.value=uf;
   const sl=document.getElementById('sl-tarifa'); if(sl) sl.value=Math.min(Math.max(uf,+sl.min),+sl.max);
   const eq=document.getElementById('home-tarifa-eq'); if(eq) eq.textContent='≈ $'+Math.round(uf*40000).toLocaleString('es-CL')+' /bus/mes · 1 UF = $40.000';
   if(typeof update==='function') update();
+  updateBreakeven();
 }
 
 function setTab(t){
@@ -1838,9 +1984,11 @@ function update(){
   const _vCont=document.getElementById('v-cont'); if(_vCont) _vCont.textContent=(v.cont*100).toFixed(0)+'%';
   const _vContEff=document.getElementById('v-cont-eff'); if(_vContEff) _vContEff.textContent=v.cont>0?('· OPEX efectivo: '+fmtCLP(v.opexEff,true)+'/mes'):'';
   document.getElementById('v-capexbus').textContent='$'+v.capexBus.toLocaleString('es-CL');
-  document.getElementById('v-tdesc').textContent=(v.tdescPct/10).toFixed(1)+'% / mes';
+  document.getElementById('v-tdesc').textContent=(v.tdescPct/10).toFixed(1)+'% / mes real';
   document.getElementById('v-pcred').textContent=v.pcred===0?'Sin crédito':v.pcred+' meses';
   document.getElementById('v-icred').textContent=v.icredPct+'% / año';
+  const _vTax=document.getElementById('v-tax'); if(_vTax) _vTax.textContent=v.taxRate+'%';
+  const _vDep=document.getElementById('v-dep'); if(_vDep) _vDep.textContent=v.depYears+(v.depYears===1?' año':' años');
 
   const tDesc=v.tdescPct/1000;
   const tCredMes=Math.pow(1+v.icredPct/100,1/12)-1;
@@ -1855,16 +2003,16 @@ function update(){
 
   // Ramp-up: fracción de flota operativa en el mes i (despliegue lineal)
   const rampFrac=i=> v.ramp>0?Math.min(1,i/v.ramp):1;
-  const labels=['0'],flujosBase=[-capex],flujosCred=[useCred?0:-capex];
-  for(let i=1;i<=v.plazo;i++){const flujoOpI=ingresoMes*rampFrac(i)-v.opexEff;labels.push(String(i));flujosBase.push(flujoOpI);flujosCred.push(flujoOpI-(i<=v.pcred?cuota:0));}
-  const flujosMain=useCred?flujosCred:flujosBase;
+  const labels=['0'];for(let i=1;i<=v.plazo;i++)labels.push(String(i));
+  // Flujos después de impuestos (escudo de depreciación + intereses)
+  const flujosMain=projectFlows({flota:v.flota,tarifaUF:v.tarifa,opexEff:v.opexEff,capexBus:v.capexBus,plazo:v.plazo,pcred:v.pcred,icredPct:v.icredPct,ramp:v.ramp,taxRate:v.taxRate,depYears:v.depYears});
+  const flujosBase=flujosMain,flujosCred=flujosMain;
   const van=calcVAN(flujosMain,tDesc);
   const tir=calcTIR(flujosMain);
-  let payback=null,cumPb=useCred?0:-capex;
-  for(let i=1;i<=v.plazo;i++){cumPb+=flujosMain[i];if(cumPb>=0&&payback===null){payback=i;break;}}
-
-  const acumBase=[],acumCred=[];let cb=0,cc=0;
-  for(let i=0;i<flujosBase.length;i++){cb+=flujosBase[i];acumBase.push(cb);cc+=flujosCred[i];acumCred.push(cc);}
+  let payback=null,cumPb=0;
+  for(let i=0;i<flujosMain.length;i++){cumPb+=flujosMain[i];if(i>0&&cumPb>=0&&payback===null){payback=i;break;}}
+  const acumBase=[],acumCred=[];let cb=0;
+  for(let i=0;i<flujosMain.length;i++){cb+=flujosMain[i];acumBase.push(cb);acumCred.push(cb);}
   const vanIncr=[];let va=flujosMain[0];vanIncr.push(va);
   for(let i=1;i<flujosMain.length;i++){va+=flujosMain[i]/Math.pow(1+tDesc,i);vanIncr.push(va);}
 
@@ -1914,8 +2062,8 @@ function update(){
   const mx=Math.min(v.plazo+1,25);
   for(let i=0;i<mx;i++){
     const ing=i===0?0:ingresoMes*rampFrac(i);
-    const eg=i===0?(useCred?0:capex)+v.opexEff:v.opexEff+(i<=v.pcred?cuota:0);
-    const fl=flujosMain[i];cum+=fl;const pb=payback===i;
+    const fl=flujosMain[i];
+    const eg=ing-fl;cum+=fl;const pb=payback===i;
     rows+=`<tr${pb?' class="payback-row"':''}><td>${i}</td><td>${i===0?'—':fmtCLP(ing,true)}</td><td class="td-neg">${fmtCLP(-eg,true)}</td><td class="${fl>=0?'td-pos':'td-neg'}">${fmtCLP(fl,true)}</td><td class="${cum>=0?'td-pos':'td-neg'}">${fmtCLP(cum,true)}</td></tr>`;
   }
   if(v.plazo+1>mx)rows+=`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:10px">... ${v.plazo+1-mx} meses más</td></tr>`;
@@ -1982,16 +2130,8 @@ function randNormal(mean,std){let u=0,v=0;while(u===0)u=Math.random();while(v===
 function randUniform(min,max){return min+Math.random()*(max-min);}
 function clamp(val,min,max){return Math.min(Math.max(val,min),max);}
 
-function calcVANsim(flota,tarifa,opex,dias,capexBus,plazo,tDesc,pcred,icredPct){
-  const tCred=Math.pow(1+icredPct/100,1/12)-1;
-  const capex=capexBus*flota;
-  // tarifa en UF/bus/mes → ingreso CLP/mes = flota × tarifa × $40.000 (param 'dias' ya no se usa)
-  const ingresoMes=flota*tarifa*40000;
-  const flujoOp=ingresoMes-opex;
-  const cuota=cuotaFrances(capex,tCred,pcred);
-  const useCred=pcred>0;
-  const flujos=[useCred?0:-capex];
-  for(let i=1;i<=plazo;i++)flujos.push(flujoOp-(i<=pcred?cuota:0));
+function calcVANsim(flota,tarifaUF,opexEff,dias,capexBus,plazo,tDesc,pcred,icredPct,ramp,taxRate,depYears){
+  const flujos=projectFlows({flota,tarifaUF,opexEff,capexBus,plazo,pcred,icredPct,ramp:ramp||0,taxRate:(taxRate==null?27:taxRate),depYears:depYears||6});
   return calcVAN(flujos,tDesc);
 }
 
@@ -2035,7 +2175,7 @@ function runMontecarlo(){
       const opexTotal=opex+contingencia;
       const capexBus=clamp(randNormal(cMed,cStd),capexMin,capexMax);
       const icredSim=clamp(randUniform(icredMin,icredMax),0,100);
-      vans.push(calcVANsim(flota,tarifa,opexTotal,30,capexBus,v.plazo,tDesc,v.pcred,icredSim));
+      vans.push(calcVANsim(flota,tarifa,opexTotal,30,capexBus,v.plazo,tDesc,v.pcred,icredSim,v.ramp,v.taxRate,v.depYears));
     }
 
     vans.sort((a,b)=>a-b);
@@ -2154,15 +2294,7 @@ function setObjMode(mode) {
 
 function calcVANobj(flota, plazo, tarifa, v) {
   const tDesc = v.tdescPct / 1000;
-  const tCredMes = Math.pow(1 + v.icredPct / 100, 1 / 12) - 1;
-  const capex = v.capexBus * flota;
-  // tarifa en UF/bus/mes → ingreso CLP/mes = flota × tarifa × $40.000
-  const ingresoMes = flota * tarifa * 40000;
-  const flujoOp = ingresoMes - v.opexEff;
-  const cuota = cuotaFrances(capex, tCredMes, v.pcred);
-  const useCred = v.pcred > 0;
-  const flujos = [useCred ? 0 : -capex];
-  for (let i = 1; i <= plazo; i++) flujos.push(flujoOp - (i <= v.pcred ? cuota : 0));
+  const flujos = projectFlows({flota,tarifaUF:tarifa,opexEff:v.opexEff,capexBus:v.capexBus,plazo,pcred:v.pcred,icredPct:v.icredPct,ramp:v.ramp,taxRate:v.taxRate,depYears:v.depYears});
   return calcVAN(flujos, tDesc);
 }
 
@@ -2599,6 +2731,141 @@ function exportPDF(){
 }
 
 renderScenarios();
+
+// ══════════════════════════════════════════════
+// CARTERA ESCALONADA (cohortes, reúso de hardware, horizonte largo, después de impuestos)
+// ══════════════════════════════════════════════
+let caCohorts=[
+  {nombre:'Cohorte 1', mes:1, anio:2026, buses:50,  plazo:24, tarifa:2},
+  {nombre:'Cohorte 2', mes:1, anio:2027, buses:100, plazo:24, tarifa:2},
+  {nombre:'Cohorte 3', mes:1, anio:2028, buses:200, plazo:24, tarifa:2}
+];
+try{const _s=localStorage.getItem('fluxus_cohorts'); if(_s){const a=JSON.parse(_s); if(Array.isArray(a)&&a.length) caCohorts=a;}}catch(e){}
+let caChart=null;
+function caSave(){ try{ localStorage.setItem('fluxus_cohorts',JSON.stringify(caCohorts)); }catch(e){} }
+function caG(id,def){const e=document.getElementById(id); const x=e?parseFloat(e.value):NaN; return isNaN(x)?def:x;}
+function caRender(){
+  const tb=document.getElementById('ca-cohorts-body'); if(!tb) return;
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  tb.innerHTML=caCohorts.map((c,i)=>'<tr>'+
+    '<td><input class="cx-in" style="width:120px;text-align:left;font-family:var(--font)" value="'+c.nombre+'" onchange="caEdit('+i+',\'nombre\',this.value)"></td>'+
+    '<td><select class="cx-in" style="width:80px" onchange="caEdit('+i+',\'mes\',this.value)">'+meses.map((m,j)=>'<option value="'+(j+1)+'" '+(c.mes===j+1?'selected':'')+'>'+m+'</option>').join('')+'</select></td>'+
+    '<td><input class="cx-in" style="width:72px" value="'+c.anio+'" onchange="caEdit('+i+',\'anio\',this.value)"></td>'+
+    '<td><input class="cx-in" style="width:72px" value="'+c.buses+'" onchange="caEdit('+i+',\'buses\',this.value)"></td>'+
+    '<td><input class="cx-in" style="width:64px" value="'+c.plazo+'" onchange="caEdit('+i+',\'plazo\',this.value)"></td>'+
+    '<td><input class="cx-in" style="width:72px" value="'+c.tarifa+'" onchange="caEdit('+i+',\'tarifa\',this.value)"></td>'+
+    '<td><button onclick="caDel('+i+')" style="padding:5px 9px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--red);font-size:12px;font-weight:700;cursor:pointer">✕</button></td>'+
+  '</tr>').join('');
+}
+function caEdit(i,f,val){
+  if(f==='nombre') caCohorts[i].nombre=val;
+  else caCohorts[i][f]=Math.max(0,parseFloat(val)||0);
+  caSave(); updateCartera();
+}
+function caAdd(){ const last=caCohorts[caCohorts.length-1]||{anio:2026}; caCohorts.push({nombre:'Cohorte '+(caCohorts.length+1),mes:1,anio:(Math.round(last.anio)||2026)+1,buses:50,plazo:24,tarifa:2}); caSave(); caRender(); updateCartera(); }
+function caDel(i){ caCohorts.splice(i,1); caSave(); caRender(); updateCartera(); }
+
+function updateCartera(){
+  if(!document.getElementById('ca-annual-body')) return;
+  const H=Math.max(12,Math.round(caG('ca-horizonte',8))*12);
+  const r=caG('ca-tasa',10)/100;
+  const tax=caG('ca-tax',27)/100;
+  const life=Math.max(1,Math.round(caG('ca-vida',6)*12));
+  const kitC=caG('ca-kit',400000);
+  const instC=caG('ca-install',75000);
+  const opexFijo=caG('ca-opexfijo',4000000);
+  const opexVar=caG('ca-opexvar',12000);
+  const diasCobro=caG('ca-dias',60);
+  const UF=40000;
+  if(caCohorts.length===0){ document.getElementById('ca-annual-body').innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px">Agrega al menos una cohorte.</td></tr>'; return; }
+  const cs=caCohorts.map(c=>({nombre:c.nombre,buses:Math.round(c.buses),plazo:Math.round(c.plazo),tarifa:+c.tarifa,abs:Math.round(c.anio)*12+(Math.round(c.mes)-1)}));
+  const minAbs=Math.min.apply(null,cs.map(c=>c.abs));
+  cs.forEach(c=>{ c.start=c.abs-minAbs; c.end=c.start+c.plazo; });
+  // ----- asignación de hardware con reúso -----
+  const order=cs.slice().sort((a,b)=>a.start-b.start);
+  const kits=[];
+  let totalKitsBought=0, totalInstalls=0;
+  const capexByMonth=new Array(H).fill(0);
+  order.forEach(c=>{
+    const s=c.start, need=c.buses, end=c.end;
+    if(s>=H||need<=0){ c.kitsBought=0; return; }
+    let reused=0;
+    for(let k=0;k<kits.length && reused<need;k++){
+      const kit=kits[k];
+      if(kit.freeAt<=s && (s-kit.purchase)+c.plazo<=life){ kit.freeAt=end; reused++; }
+    }
+    const bought=need-reused;
+    for(let n=0;n<bought;n++) kits.push({purchase:s,freeAt:end});
+    totalKitsBought+=bought; totalInstalls+=need;
+    capexByMonth[s]+= bought*kitC + need*instC;
+    c.kitsBought=bought;
+  });
+  // ----- series mensuales -----
+  const rev=new Array(H).fill(0), bus=new Array(H).fill(0), opex=new Array(H).fill(0), dep=new Array(H).fill(0);
+  cs.forEach(c=>{ for(let t=Math.max(0,c.start);t<Math.min(c.end,H);t++){ rev[t]+=c.buses*c.tarifa*UF; bus[t]+=c.buses; } });
+  for(let t=0;t<H;t++){ opex[t]=(bus[t]>0?opexFijo:0)+opexVar*bus[t]; }
+  kits.forEach(kit=>{ for(let t=Math.max(0,kit.purchase);t<Math.min(kit.purchase+life,H);t++){ dep[t]+=kitC/life; } });
+  // ----- impuesto mensual con arrastre de pérdidas -----
+  const taxArr=new Array(H).fill(0); let acc=0;
+  for(let t=0;t<H;t++){ const base=rev[t]-opex[t]-dep[t]; if(base<0){acc+=-base;} else {const off=Math.min(acc,base);acc-=off;taxArr[t]=(base-off)*tax;} }
+  // ----- capital de trabajo + FCF mensual -----
+  const wc=new Array(H).fill(0); for(let t=0;t<H;t++) wc[t]=rev[t]*(diasCobro/30);
+  const fcf=new Array(H).fill(0);
+  let totalRev=0,totalTax=0,totalCapex=0;
+  for(let t=0;t<H;t++){
+    const dWC = wc[t]-(t>0?wc[t-1]:0);
+    fcf[t]=rev[t]-opex[t]-taxArr[t]-capexByMonth[t]-dWC;
+    totalRev+=rev[t]; totalTax+=taxArr[t]; totalCapex+=capexByMonth[t];
+  }
+  // valor residual del hardware con vida remanente + liberación de WC al cierre
+  let residual=0; kits.forEach(kit=>{ const rem=(kit.purchase+life)-H; if(rem>0) residual+=kitC*(rem/life); });
+  fcf[H-1]+= residual + wc[H-1];
+  // ----- agregación anual -----
+  const years=Math.ceil(H/12); const A=[];
+  for(let y=0;y<years;y++){
+    let R0=0,O=0,D=0,T=0,C=0,F=0,bEnd=0;
+    for(let m=y*12;m<Math.min((y+1)*12,H);m++){ R0+=rev[m];O+=opex[m];D+=dep[m];T+=taxArr[m];C+=capexByMonth[m];F+=fcf[m]; bEnd=bus[m]; }
+    A.push({y:y,rev:R0,opex:O,dep:D,tax:T,capex:C,fcf:F,busEnd:bEnd});
+  }
+  let van=0; A.forEach((a,y)=> van+=a.fcf/Math.pow(1+r,y+1));
+  const tir=calcTIR([0].concat(A.map(a=>a.fcf)));
+  let pay=null,cum0=0; for(let y=0;y<A.length;y++){cum0+=A[y].fcf; if(cum0>=0&&pay===null){pay=y+1;}}
+  const pico=bus.length?Math.max.apply(null,bus):0;
+  const reuseKits=totalInstalls-totalKitsBought;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const vanEl=document.getElementById('ca-van');
+  set('ca-van',fmtCLP(van,true)); if(vanEl) vanEl.parentElement.className='metric-card '+(van>0?'is-pos':'is-neg');
+  set('ca-van-sub',(r*100).toFixed(1)+'%/año real · '+(H/12)+' años');
+  set('ca-tir', tir!=null?((tir*100).toFixed(1)+'%/año'):'N/A');
+  set('ca-ing',fmtCLP(totalRev,true));
+  set('ca-imp',fmtCLP(totalTax,true));
+  set('ca-pico',pico.toLocaleString('es-CL')+' buses');
+  set('ca-installs',totalInstalls.toLocaleString('es-CL'));
+  set('ca-kits',totalKitsBought.toLocaleString('es-CL'));
+  set('ca-reuse',reuseKits.toLocaleString('es-CL')+' kits');
+  set('ca-reuse-clp',fmtCLP(reuseKits*kitC,true));
+  set('ca-capex',fmtCLP(totalCapex,true));
+  const baseYear=Math.floor(minAbs/12);
+  let html='',cumF=0;
+  A.forEach(function(a){ cumF+=a.fcf; const ebitda=a.rev-a.opex; const util=a.rev-a.opex-a.dep-a.tax;
+    html+='<tr><td>'+(baseYear+a.y)+'</td><td>'+a.busEnd.toLocaleString('es-CL')+'</td><td>'+fmtCLP(a.rev,true)+'</td><td class="td-neg">'+fmtCLP(-a.opex,true)+'</td><td>'+fmtCLP(ebitda,true)+'</td><td class="td-neg">'+fmtCLP(-a.dep,true)+'</td><td class="td-neg">'+fmtCLP(-a.tax,true)+'</td><td class="'+(util>=0?'td-pos':'td-neg')+'">'+fmtCLP(util,true)+'</td><td class="td-neg">'+fmtCLP(-a.capex,true)+'</td><td class="'+(a.fcf>=0?'td-pos':'td-neg')+'">'+fmtCLP(a.fcf,true)+'</td><td class="'+(cumF>=0?'td-pos':'td-neg')+'">'+fmtCLP(cumF,true)+'</td></tr>'; });
+  document.getElementById('ca-annual-body').innerHTML=html;
+  set('ca-note','VAN '+fmtCLP(van,true)+' · TIR '+(tir!=null?(tir*100).toFixed(1)+'%/año':'N/A')+' · payback '+(pay?('año '+pay):'>'+years+' años')+'. El reúso evitó comprar '+reuseKits+' kits (≈ '+fmtCLP(reuseKits*kitC,true)+'). Incluye valor residual del hardware con vida remanente y liberación de capital de trabajo al cierre del horizonte.');
+  // gráfico
+  const labels=A.map(a=>String(baseYear+a.y));
+  const busSeries=A.map(a=>a.busEnd);
+  let acc2=0; const cumSeries=A.map(a=>{acc2+=a.fcf;return acc2;});
+  const ds=[
+    {type:'bar',label:'Buses (fin de año)',data:busSeries,backgroundColor:'rgba(43,127,214,0.5)',borderColor:'#2B7FD6',borderWidth:1,yAxisID:'y'},
+    {type:'line',label:'FCF acumulado',data:cumSeries,borderColor:'#1F9D6B',backgroundColor:'rgba(31,157,107,0.08)',pointRadius:3,tension:0.3,yAxisID:'y1',fill:true}
+  ];
+  const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+(c.dataset.yAxisID==='y1'?fmtCLP(c.parsed.y,true):c.parsed.y+' buses');}}}},scales:{x:{ticks:{color:'#55536a',font:{size:11}},grid:{display:false}},y:{position:'left',ticks:{color:'#55536a',font:{size:10}},grid:{color:'rgba(10,29,58,0.05)'},title:{display:true,text:'Buses',color:'#94A3B8',font:{size:10}}},y1:{position:'right',ticks:{color:'#55536a',font:{size:10},callback:function(v){return fmtCLP(v,true);}},grid:{display:false},title:{display:true,text:'FCF acum.',color:'#94A3B8',font:{size:10}}}}};
+  const cv=document.getElementById('ca-chart');
+  if(cv){ if(caChart) caChart.destroy(); caChart=new Chart(cv,{type:'bar',data:{labels:labels,datasets:ds},options:opts}); }
+}
+['ca-horizonte','ca-tasa','ca-tax','ca-vida','ca-kit','ca-install','ca-opexfijo','ca-opexvar','ca-dias'].forEach(function(id){var e=document.getElementById(id); if(e) e.addEventListener('input',updateCartera);});
+caRender();
+
 </script>
 </body>
 </html>
